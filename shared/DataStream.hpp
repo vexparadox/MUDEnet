@@ -67,27 +67,22 @@ public:
 		return false;
 	}
 
-	bool write(const char* t, size_t size)
-	{
-		if(size != 0)
-		{
-			if(m_head+size <= m_data+m_data_size)
-			{
-				memcpy((char*)m_head, t, size);
-				m_head += size;
-				return true;
-			}
-		}
-		std::cout << "Attempt to write invalid memory size to data stream" << std::endl;
-		return false;
-	}
-
 	bool write(const std::string& str)
 	{
-		if(m_head+str.size() <= m_data+m_data_size)
+		return write(str.c_str(), str.size());
+	}
+
+	template <typename T>
+	bool write(const T* t, size_t size = 0)
+	{
+		if(size == 0)
 		{
-			memcpy((char*)m_head, str.c_str(), str.size());
-			m_head += str.size();
+			size = sizeof(*t);
+		}
+		if(m_head+size <= m_data+m_data_size)
+		{
+			memcpy((char*)m_head, t, size);
+			m_head += size;
 			return true;
 		}
 		std::cout << "Attempt to write invalid memory size to data stream" << std::endl;
@@ -108,7 +103,7 @@ public:
 	}
 
 	template <typename T>
-	bool write(size_t position, const T& t)
+	bool write_at(size_t position, const T& t)
 	{
 		if(m_data+position+sizeof(t) <= m_data+m_data_size)
 		{
@@ -118,4 +113,22 @@ public:
 		std::cout << "Attempt to write invalid memory size to data stream" << std::endl;
 		return false;
 	}
+
+	template <typename T>
+	bool write_at(size_t position, const T* t, size_t size = 0)
+	{
+		if(size == 0)
+		{
+			size = sizeof(*t);
+		}
+		if(m_head+position+size <= m_data+m_data_size)
+		{
+			memcpy((char*)m_data+position, t, size);
+			m_head += size;
+			return true;
+		}
+		std::cout << "Attempt to write invalid memory size to data stream" << std::endl;
+		return false;
+	}
+
 };
