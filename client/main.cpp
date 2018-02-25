@@ -146,10 +146,7 @@ void userDisconnected(ENetEvent* event){
 
 void messageRecieved(ENetEvent* event){
     //print the packet
-    printf ("%s: %s \n",
-            usernames[event->packet -> data[1]],
-            event->packet -> data+2
-            );
+    printf ("%s\n", event->packet->data+2);
     enet_packet_destroy (event->packet);
 }
 

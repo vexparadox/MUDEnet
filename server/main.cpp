@@ -30,6 +30,7 @@ int main(int argc, char const *argv[])
     mud_actions.push_back(std::make_pair("look", mud_look));
     mud_actions.push_back(std::make_pair("say", mud_say));
     mud_actions.push_back(std::make_pair("go", mud_go));
+    mud_actions.push_back(std::make_pair("help", mud_help));
 
     world_state.load("map.json");
     world_state.parse();
@@ -210,7 +211,7 @@ void messageRecieved(ENetEvent* event)
     }
     else
     {
-        respond_to_sender(event, "This is an unknown action!");
+        respond_to_sender(event, "This is an unknown action, try using help!");
     }
     enet_packet_destroy (event->packet);
 }
@@ -269,7 +270,7 @@ void mud_say(ENetEvent* event, std::vector<std::string> tokens)
 {
     if(tokens.size() < 2)
     {
-        respond_to_sender(event, "This action needs parameters!");
+        respond_to_sender(event, "This action needs parameters, try using help!");
     }
     else
     {
@@ -282,6 +283,18 @@ void mud_go(ENetEvent* event, std::vector<std::string> tokens)
     std::cout << "go" << std::endl;
 }
 
+void mud_help(ENetEvent* event, std::vector<std::string>)
+{
+    std::string help_str = "\n";
+    help_str.append("You can use the following commands:");
+    help_str.append("\n");
+    help_str.append("go <direction>");
+    help_str.append("\n");
+    help_str.append("look (direction)");
+    help_str.append("\n");
+    help_str.append("say <message>");
+    respond_to_sender(event, help_str);
+}
 const ClientState& ClientStateForID(char id)
 {
     auto found_user = std::find_if(client_states.begin(), client_states.end(), [id](const ClientState& state)

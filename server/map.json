@@ -1,5 +1,5 @@
 {
-	"welcome_text" : "Welcome to AnvilHack4",
+	"welcome_text" : "Welcome to AnvilHack4, use 'help' to see what you can do.",
 	"width": 3,
 	"height": 2,
 	"worldmap":[
@@ -10,7 +10,7 @@
 			"here": "You take a look around, this is a small town that likes to keep up appearances. In the middle of the square you see a message board onto which others have scribed inspirational messages.\nOn the edge of town there\"s a small band of tired soldiers, they have a mysterious yellow exclamation mark above their heads.",
 			"n": "To the north you see the world falling away into a dark void, it turns your stomach.",
 			"e": "To the east you can see a small path winding through a forest.",
-			"s": "Turning to the south you see a thick forest, it\"s impassable without some tools.",
+			"s": "Turning to the south you see a thick forest, it's impassable without some tools.",
 			"w": "Looking to the west you see a vast expanse of nothingness, you feel dizzy and turn away.",
 			"requireditems": [],
 			"passable": true
@@ -31,7 +31,7 @@
 			"id": 2,
 			"title": "Crattelish Outpost",
 			"description": "An outpost manned by the proud but fickle Crattelish people.",
-			"here": "This place feels safe. There\"s a message board on the side of a hut, it has messages left by other travellers.\nTaking a closer look there\"s also some job postings." ,
+			"here": "This place feels safe. There's a message board on the side of a hut, it has messages left by other travellers.\nTaking a closer look there\"s also some job postings." ,
 			"n": "To the north the ground slips away into the void.",
 			"e": "The east carries a sense of danger, you decide to go another day.",
 			"s": "Looking to the south you see a break in the thick forest, there seems to be a path.",
@@ -55,9 +55,9 @@
 			"id": 4,
 			"title": "Farghen Forest Outskirts",
 			"description": "The outskirts of the Fargen Forest.",
-			"here": "This place feels safe. There\"s a message board on the side of a hut, it has messages left by other travellers.\nTaking a closer look there\"s also some job postings." ,
-			"n": "Over the hill to the north you see the Forest Path, you\"re annoyed at how easy it was to walk.",
-			"e": "To the east there\"s a path lined with guards, they seem stiff.",
+			"here": "This place feels safe. There's a message board on the side of a hut, it has messages left by other travellers.\nTaking a closer look there\"s also some job postings." ,
+			"n": "Over the hill to the north you see the Forest Path, you're annoyed at how easy it was to walk.",
+			"e": "To the east there's a path lined with guards, they seem stiff.",
 			"s": "The south sees the world fall away into black, you turn away.",
 			"w": "Turning to the west you see the forest continue.",
 			"requireditems": ["cut"],
@@ -71,7 +71,7 @@
 			"n": "To the north you see smoke rising about the Crattelish Outpost.",
 			"e": "The east gives you a sense of dread, past the trees you see the dark.",
 			"s": "Looking to the south you see COMING SOON LOL.",
-			"w": "The west is walled by an indescribably thick forest, you\"ll need tools to get through there.",
+			"w": "The west is walled by an indescribably thick forest, you'll need tools to get through there.",
 			"requireditems": [],
 			"passable": true
 		}

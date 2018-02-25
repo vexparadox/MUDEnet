@@ -1,7 +1,5 @@
-# IM system
-This is a micro instant messaging system, there's a server and client side. Users can have a custom Username and talk to others on the same server.
-
-Blog post coming soon.
+# MUDEnet system
+This is a MUD built using Enet in C++!
 
 ## Requirements & Setup
 If you're compiling from scratch you'll need the Enet library to be linked, http://enet.bespin.org. On Linux and OSX it's a simple make install process, it's also available on HomeBrew `brew install enet`.
@@ -35,10 +33,3 @@ Note that B2 is used for UserIDs, the Client doesn't need to know about its own 
 |:-------:|:--:|:----:|-----------------|:----------------------------------------------------:|
 | Message |  0 | NULL | Message Content | B2 is filled by the Server when broadcast to clients |
 | Username |  1 | NULL | Username | B3-B510 is saved and broadcast to other clients |
-
-### One day...
-OpenSSL support
-
-Change packet size to a defined constant, it's messy with literals all over
-
-Add a server disconnect packet, S->C. Could use the User Disconnected packet, special case for 255 (Server ID)

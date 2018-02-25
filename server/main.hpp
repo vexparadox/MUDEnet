@@ -43,4 +43,5 @@ void respond_to_sender(ENetEvent* event, const std::string& str);
 void mud_look(ENetEvent* event, std::vector<std::string>);
 void mud_say(ENetEvent* event, std::vector<std::string>);
 void mud_go(ENetEvent* event, std::vector<std::string>);
+void mud_help(ENetEvent* event, std::vector<std::string>);
 

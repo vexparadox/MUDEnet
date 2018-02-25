@@ -22,9 +22,9 @@ class WorldState
 {
 	int m_world_height;
 	int m_world_width;
-	std::string m_welcome_string;
 	std::vector<Location> m_locations;
 public:
+	std::string m_welcome_string;
 	const std::vector<Location>& Locations() { return m_locations; };
 	json json_obj;
 	void load(const std::string& filename);
