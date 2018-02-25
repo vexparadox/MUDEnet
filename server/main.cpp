@@ -135,7 +135,7 @@ void userDisconnected(ENetEvent* event)
 
     //clear the client's enet peer, this is so we know they're logged in
     ClientState* client_state = ClientStateForID(user_id);
-    client_state->SetEnetPeer(nullptr);
+    client_state->SetENetPeer(nullptr);
 
     broadcast_stream.clear_data();
     broadcast_stream.write(Byte(2)); // user disconnected
@@ -167,13 +167,13 @@ void newUser(ENetEvent* event)
         *(char*)event->peer->data = (char)found_user->ID();
         broadcast_stream.write((char)found_user->ID()); // write the users ID
         broadcast_stream.write(found_user->Username()); // copy the old username
-        found_user->SetEnetPeer(event->peer);
+        found_user->SetENetPeer(event->peer);
         std::cout << "Returning user with id/name: " << found_user->ID() << "/" << found_user->Username() << std::endl;
     }
     else
     {
         ClientState new_state(*(char*)event->peer->data, (char*)event->packet->data+2);
-        new_state.SetEnetPeer(event->peer);
+        new_state.SetENetPeer(event->peer);
         client_states.push_back(new_state);
 
         broadcast_stream.write((char)new_state.ID()); // write the users ID
@@ -227,14 +227,14 @@ void messageRecieved(ENetEvent* event)
     }
     else
     {
-        respond_to_sender(event, "This is an unknown action, try using help!");
+        message_peer(event->peer, "This is an unknown action, try using help!");
     }
     enet_packet_destroy (event->packet);
 }
 
-void respond_to_sender(ENetEvent* event, const std::string& str)
+void message_peer(ENetPeer* peer, const std::string& str)
 {
-    //sends the string given to the event->peer passed
+    //sends the string given to the peer passed
     //sends as a message from the server to the client, the client should just print this
     DataStream stream(1024);
     stream.clear_data();
@@ -242,7 +242,7 @@ void respond_to_sender(ENetEvent* event, const std::string& str)
     stream.write(Byte(255));
     stream.write(str);
     ENetPacket* packet = enet_packet_create (stream.data(), stream.size(), ENET_PACKET_FLAG_RELIABLE);
-    enet_peer_send (event->peer, 0, packet);
+    enet_peer_send (peer, 0, packet);
     enet_host_flush (host.load());
 }
 
@@ -287,18 +287,26 @@ void mud_look(ENetEvent* event, std::vector<std::string> tokens)
             location.append(client_loc.m_here);
         }
     }
-    respond_to_sender(event, location);
+    message_peer(event->peer, location);
 }
 
 //allows players to talk to people at the same location to them
 void mud_say(ENetEvent* event, std::vector<std::string> tokens)
 {
+    ClientState* client = ClientStateForID(*(char*)event->peer->data);
     if(tokens.size() < 2)
     {
-        respond_to_sender(event, "This action needs parameters, try using help!");
+        message_peer(event->peer, "This action needs parameters, try using help!");
     }
     else
     {
+        for(ClientState& state : client_states)
+        {
+            if(state.ENetPeer() && client->LocationID() == state.LocationID())
+            {
+                message_peer(state.ENetPeer(), tokens.at(1));
+            }
+        }
         std::cout << "say" << std::endl;
     }
 }
@@ -311,7 +319,7 @@ void mud_go(ENetEvent* event, std::vector<std::string> tokens)
     const Location& client_loc = world_state.Locations().at(client->LocationID());
     if(tokens.size() < 2)
     {
-        respond_to_sender(event, "This action needs parameters, try using help!");
+        message_peer(event->peer, "This action needs parameters, try using help!");
     }
     else
     {
@@ -382,7 +390,7 @@ void mud_go(ENetEvent* event, std::vector<std::string> tokens)
             }
         }
         //todo: we may want to tell other players in the location that this player has left/joined
-        respond_to_sender(event, response);
+        message_peer(event->peer, response);
     }
 }
 
@@ -400,7 +408,7 @@ void mud_help(ENetEvent* event, std::vector<std::string>)
     help_str.append("\n");
     help_str.append("exit");
 
-    respond_to_sender(event, help_str);
+    message_peer(event->peer, help_str);
 }
 
 //returns a client state for an ID

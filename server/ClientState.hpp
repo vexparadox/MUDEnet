@@ -13,8 +13,8 @@ public:
 	ClientState(){};
 	ClientState(int id, const std::string& username) : m_id(id), m_username(username) {};
 
-	void SetEnetPeer(ENetPeer* peer) { m_enet_peer = peer; }
-	ENetPeer* EnetPeer() { return m_enet_peer; }
+	void SetENetPeer(ENetPeer* peer) { m_enet_peer = peer; }
+	ENetPeer* ENetPeer() { return m_enet_peer; }
 
 	const std::string& Username() const {return m_username;}
 	int ID() const { return m_id; }

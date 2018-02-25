@@ -39,7 +39,7 @@ ClientState* ClientStateForID(char id);
 std::vector<ClientState> client_states;
 std::vector<std::pair<const std::string&, MUDAction>> mud_actions;
 
-void respond_to_sender(ENetEvent* event, const std::string& str);
+void message_peer(ENetPeer* peer, const std::string& str);
 void mud_look(ENetEvent* event, std::vector<std::string>);
 void mud_say(ENetEvent* event, std::vector<std::string>);
 void mud_go(ENetEvent* event, std::vector<std::string>);
