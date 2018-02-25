@@ -48,15 +48,6 @@ int main(int argc, char const *argv[])
         running.store(false);
     }
 
-    //setup the usernames array
-    //usernames are 255 chars max
-    usernames = (char**)malloc(sizeof(char)*255*sizeof(char*));
-    for(int i = 0; i < 255; i++){
-        usernames[i] = (char*)malloc(sizeof(char)*510);
-        memset(usernames[i], 0, 510);
-    }
-    usernames[255] = "Server"; // set the special 255 to Server
-
     //start the input thread
     std::thread inputThread(&takeInput);
     //start the main loop
@@ -72,9 +63,9 @@ int main(int argc, char const *argv[])
                 actions[event.packet->data[0]](&event);
             }break;
             case ENET_EVENT_TYPE_DISCONNECT:
-                printf ("%s disconnected.\n", usernames[*(char*)event.peer->data]);
-                event.peer -> data = NULL;
-                running.store(false);
+                // printf ("%s disconnected.\n", usernames[*(char*)event.peer->data]);
+                // event.peer -> data = NULL;
+                // running.store(false);
                 break;
             case ENET_EVENT_TYPE_NONE:
                 break;
@@ -139,11 +130,6 @@ void takeInput()
     }
 }
 
-void userDisconnected(ENetEvent* event){
-    printf("%s has disconnected.\n", usernames[event->packet->data[1]]);
-    memset(usernames[event->packet->data[1]], 0, 255);
-}
-
 void messageRecieved(ENetEvent* event){
     //print the packet
     printf ("%s\n", event->packet->data+2);
@@ -153,7 +139,7 @@ void messageRecieved(ENetEvent* event){
 //occurs when new clients connect to the server
 void newUser(ENetEvent* event){
     //save the username that was given by the server
-    memcpy(usernames[event->packet->data[1]], event->packet->data+2, 510); 
+    //memcpy(usernames[event->packet->data[1]], event->packet->data+2, 510); 
     enet_packet_destroy (event->packet);
 }
 
