@@ -1,5 +1,5 @@
 #pragma once
-#include "json.hpp"
+#include "../shared/json.hpp"
 
 using json = nlohmann::json;
 
@@ -26,7 +26,7 @@ public:
 	std::string m_welcome_string;
 	int m_world_height;
 	int m_world_width;
-	
+
 	const std::vector<Location>& Locations() { return m_locations; };
 	json json_obj;
 	void load(const std::string& filename);

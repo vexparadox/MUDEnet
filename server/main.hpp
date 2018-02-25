@@ -1,7 +1,7 @@
 #pragma once
 #include "ClientState.hpp"
 #include "WorldState.hpp"
-#include "DataStream.hpp"
+#include "../shared/DataStream.hpp"
 #include <memory>
 #include <vector>
 #include <stdio.h>
