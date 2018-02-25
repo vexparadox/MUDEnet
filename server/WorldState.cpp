@@ -17,7 +17,12 @@ void WorldState::parse()
 	auto world_array = json_obj["worldmap"];
 	for(auto world : world_array)
 	{
-		m_locations.emplace_back(Location(world["id"], world["title"], world["description"], world["here"], world["n"], world["e"], world["s"], world["w"], world["passable"]));
+		std::vector<std::string> required_items;
+		for(auto item : world["requireditems"])
+		{
+			required_items.push_back(item.get<std::string>());
+		}
+		m_locations.emplace_back(Location(world["id"], world["title"], world["description"], world["here"], world["n"], world["e"], world["s"], world["w"], std::move(required_items), world["passable"]));
 	}
 }
 
