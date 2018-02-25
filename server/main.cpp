@@ -138,7 +138,7 @@ void userDisconnected(ENetEvent* event)
     sendBroadcast(); // send the broadcast
     event->peer->data = NULL;
 
-    std::cout << ClientStateForID(user_id).Username() << " disconected." << std::endl;
+    std::cout << ClientStateForID(user_id)->Username() << " disconected." << std::endl;
 
 }
 
@@ -230,8 +230,8 @@ void respond_to_sender(ENetEvent* event, const std::string& str)
 
 void mud_look(ENetEvent* event, std::vector<std::string> tokens)
 {
-    const ClientState& client = ClientStateForID(*(char*)event->peer->data);
-    const Location& client_loc = world_state.Locations().at(client.LocationID());
+    ClientState* client = ClientStateForID(*(char*)event->peer->data);
+    const Location& client_loc = world_state.Locations().at(client->LocationID());
     std::string location;
     location.append("\n");
     location.append("----" + client_loc.m_title + "----");
@@ -280,7 +280,66 @@ void mud_say(ENetEvent* event, std::vector<std::string> tokens)
 
 void mud_go(ENetEvent* event, std::vector<std::string> tokens)
 {
-    std::cout << "go" << std::endl;
+    ClientState* client = ClientStateForID(*(char*)event->peer->data);
+    const Location& client_loc = world_state.Locations().at(client->LocationID());
+    if(tokens.size() < 2)
+    {
+        respond_to_sender(event, "This action needs parameters, try using help!");
+    }
+    else
+    {
+        std::string response;
+        std::string& param1 = tokens.at(1);
+        if(param1 == "n" || param1 == "north")
+        {
+            if(client->LocationID() < world_state.m_world_width)
+            {
+                response = "You can't go in that direction.";
+            }
+            else
+            {
+                client->SetLocation(client->LocationID()-world_state.m_world_width);
+                response = "You travel north.";
+            }
+        }
+        else if(param1 == "e" || param1 == "east")
+        {
+            if((client->LocationID()+1) % world_state.m_world_width == 0)
+            {
+                response = "You can't go in that direction.";
+            }
+            else
+            {
+                client->SetLocation(client->LocationID()+1);
+                response = "You travel east.";
+            }
+        }
+        else if(param1 == "s" || param1 == "south")
+        {
+            if((client->LocationID() / world_state.m_world_height) >= world_state.m_world_height)
+            {
+                response = "You can't go in that direction.";
+            }
+            else
+            {
+                client->SetLocation(client->LocationID()+world_state.m_world_width);
+                response = "You travel south.";
+            }
+        }
+        else if(param1 == "w" || param1 == "west")
+        {
+            if(client->LocationID() % world_state.m_world_width == 0)
+            {
+                response = "You can't go in that direction.";
+            }
+            else
+            {
+                client->SetLocation(client->LocationID()-1);
+                response = "You travel west.";
+            }
+        }
+        respond_to_sender(event, response);
+    }
 }
 
 void mud_help(ENetEvent* event, std::vector<std::string>)
@@ -295,7 +354,7 @@ void mud_help(ENetEvent* event, std::vector<std::string>)
     help_str.append("say <message>");
     respond_to_sender(event, help_str);
 }
-const ClientState& ClientStateForID(char id)
+ClientState* ClientStateForID(char id)
 {
     auto found_user = std::find_if(client_states.begin(), client_states.end(), [id](const ClientState& state)
     {
@@ -303,7 +362,7 @@ const ClientState& ClientStateForID(char id)
     });
     if(found_user != client_states.end())
     {
-        return *found_user;
+        return &(*found_user);
     }
-    return ClientState();
+    return nullptr;
 }

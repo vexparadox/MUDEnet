@@ -16,6 +16,6 @@ void WorldState::parse()
 	auto world_array = json_obj["worldmap"];
 	for(auto world : world_array)
 	{
-		m_locations.emplace_back(Location(world["id"], world["title"], world["description"], world["here"], world["n"], world["e"], world["s"], world["w"]));
+		m_locations.emplace_back(Location(world["id"], world["title"], world["description"], world["here"], world["n"], world["e"], world["s"], world["w"], world["passable"]));
 	}
 }

@@ -14,4 +14,5 @@ public:
 	const std::string& Username() const {return m_username;}
 	int ID() const { return m_id; }
 	int LocationID() const {return m_locationid;}
+	void SetLocation(int l) { m_locationid = l;}
 };

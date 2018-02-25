@@ -35,7 +35,7 @@ Action actions[] = {
 
 //MUD code
 WorldState world_state;
-const ClientState& ClientStateForID(char id);
+ClientState* ClientStateForID(char id);
 std::vector<ClientState> client_states;
 std::vector<std::pair<const std::string&, MUDAction>> mud_actions;
 
