@@ -184,7 +184,11 @@ void newUser(ENetEvent* event)
         ENetPacket* packet = enet_packet_create (stream.data(), stream.size(), ENET_PACKET_FLAG_RELIABLE);
         enet_peer_send (event->peer, 0, packet);
         enet_host_flush (host.load());
-    }
+    }    
+
+    //send the user the information for where they currently are
+    mud_look(event, std::vector<std::string>());
+
     enet_packet_destroy (event->packet);
 }
 
@@ -261,6 +265,10 @@ void mud_look(ENetEvent* event, std::vector<std::string> tokens)
         else if(param1 == "w" || param1 == "west")
         {
             location.append(client_loc.m_west);
+        }
+        else
+        {
+            location.append(client_loc.m_here);
         }
     }
     respond_to_sender(event, location);
@@ -352,6 +360,9 @@ void mud_help(ENetEvent* event, std::vector<std::string>)
     help_str.append("look (direction)");
     help_str.append("\n");
     help_str.append("say <message>");
+    help_str.append("\n");
+    help_str.append("exit");
+
     respond_to_sender(event, help_str);
 }
 ClientState* ClientStateForID(char id)
