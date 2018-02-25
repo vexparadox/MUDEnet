@@ -26,12 +26,14 @@ int main(int argc, char const *argv[])
     ENetEvent event;
     peer.store(enet_host_connect (client.load(), &clientAddress, 2, 0));
     enet_host_flush (client.load());
-    if (!peer.load()){
+    if (!peer.load())
+    {
     	printf("%s\n", "No available peers for initiating an ENet connection.");
     }
 
     printf("%s\n", "Attempting to connect...");
 
+    //listen for the connect
     if (enet_host_service (client.load(), &event, 2000) > 0 &&
         event.type == ENET_EVENT_TYPE_CONNECT)
     {
@@ -47,6 +49,7 @@ int main(int argc, char const *argv[])
     }
 
     //setup the usernames array
+    //usernames are 255 chars max
     usernames = (char**)malloc(sizeof(char)*255*sizeof(char*));
     for(int i = 0; i < 255; i++){
         usernames[i] = (char*)malloc(sizeof(char)*510);
@@ -57,7 +60,8 @@ int main(int argc, char const *argv[])
     //start the input thread
     std::thread inputThread(&takeInput);
     //start the main loop
-    while(running.load() && connected){
+    while(running.load() && connected)
+    {
         ENetEvent event;
         //wait upto half a second for an event
         while (enet_host_service (client.load(), &event, 500) > 0)
@@ -76,14 +80,14 @@ int main(int argc, char const *argv[])
                 break;
             }
         }
-
     }
     inputThread.join();
     disconnect();
     return 0;
 }
 
-void getUsername(){
+void getUsername()
+{
     char buffer[510];
     char message[512];
     memset(buffer, 0, 510);
@@ -104,7 +108,8 @@ void getUsername(){
     enet_host_flush (client.load());
 }
 
-void takeInput(){
+void takeInput()
+{
     char message[512];
     char buffer[510];
     while (running.load()){
@@ -148,11 +153,10 @@ void messageRecieved(ENetEvent* event){
     enet_packet_destroy (event->packet);
 }
 
+//occurs when new clients connect to the server
 void newUser(ENetEvent* event){
-    //save the username that was given
+    //save the username that was given by the server
     memcpy(usernames[event->packet->data[1]], event->packet->data+2, 510); 
-    //print to tell the user
-    printf("New user with the name: %s\n", usernames[event->packet->data[1]]);
     enet_packet_destroy (event->packet);
 }
 

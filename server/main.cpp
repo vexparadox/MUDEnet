@@ -4,34 +4,39 @@ int main(int argc, char const *argv[])
     if (enet_initialize () != 0)
     {
         fprintf (stderr, "An error occurred while initializing ENet.\n");
-        return EXIT_FAILURE;
+        return 1;
     }
     atexit (enet_deinitialize);
 
-    if(argc < 3){
+    if(argc < 3)
+    {
     	fprintf(stderr, "No address or port was supplied\n");
-    	return EXIT_FAILURE;
+    	return 1;
     }
 	clientCount = 0;
-	broadcastMessage = (char*)malloc(sizeof(char)*512);
     enet_address_set_host(&serverAddress, argv[1]);
     serverAddress.port = atoi(argv[2]);
 
     host.store(enet_host_create (&serverAddress, 32, 2, 0, 0));
-    if (!host.load()) { 
+    if (!host.load()) 
+    { 
         printf("%s\n", "An error occurred while trying to create the server host."); 
-        return EXIT_FAILURE;
+        return 1;
     }
     run.store(true);
+
+
+    //make the pairs of mud functions
+    mud_actions.push_back(std::make_pair("look", mud_look));
+    mud_actions.push_back(std::make_pair("say", mud_say));
+    mud_actions.push_back(std::make_pair("go", mud_go));
+
+    world_state.load("map.json");
+    world_state.parse();
+
     printf("Server was started on %s:%s, now listening for clients.\n", argv[1], argv[2]);
     std::thread inputThread(&takeInput);
 
-    //setup the usernames array
-    usernames = (char**)malloc(sizeof(char)*255*sizeof(char*));
-    for(int i = 0; i < 255; i++){
-        usernames[i] = (char*)malloc(sizeof(char)*510);
-        memset(usernames[i], 0, 510);
-    }
     while(run.load()){
         ENetEvent event;
         //wait upto half a second for an event
@@ -39,41 +44,31 @@ int main(int argc, char const *argv[])
         {
             switch (event.type)
             {
-            case ENET_EVENT_TYPE_CONNECT:{
-                    memset(broadcastMessage, 0, 512);
-			        printf ("A new client connected from %x:%u.\n", 
-			                event.peer -> address.host,
-			                event.peer -> address.port);
-                    //make space for the new users ID
-					event.peer->data = malloc(sizeof(char));
-                    //write the new client Count
-					*(char*)event.peer->data = clientCount;
-					printf("New connection with ID of: %x\n", clientCount); // print the id
-					clientCount++; // increment the id
-                    broadcastMessage[0] = 0; //this is a message
-                    broadcastMessage[1] = 255; // say it's from the server
-                    char tempMessage[] = "Welcome to the Server.";
-                    //copy the welcome message
-                    memcpy(broadcastMessage+2, tempMessage, strlen(tempMessage)+1);
-                    //create a packet and send
-	        	    ENetPacket* packet = enet_packet_create (broadcastMessage, 512, ENET_PACKET_FLAG_RELIABLE);
-					enet_peer_send (event.peer, 0, packet);
-				    enet_host_flush (host.load());
+            //When a player connects
+            case ENET_EVENT_TYPE_CONNECT:
+            {
+		        printf ("A new client connected from %x:%u.\n", 
+		                event.peer -> address.host,
+		                event.peer -> address.port);
 
-                    //tell the new user about old ones
-                    for(int i = 0; i < 255; i++){
-                        if(strlen(usernames[i]) != 0){
-                            memset(broadcastMessage, 0, 512);
-                            broadcastMessage[0] = 1;
-                            broadcastMessage[1] = i;
-                            memcpy(broadcastMessage+2, usernames[i], 510);
-                            ENetPacket* packet = enet_packet_create (broadcastMessage, 512, ENET_PACKET_FLAG_RELIABLE);
-                            enet_peer_send (event.peer, 0, packet);
-                            enet_host_flush (host.load());
-                        }
-                    }
-                }break;
-            case ENET_EVENT_TYPE_RECEIVE:{
+                //make space for the new users ID
+				event.peer->data = malloc(sizeof(char));
+                //write the new client Count
+				*(char*)event.peer->data = clientCount;
+				clientCount++; // increment the id
+
+                broadcast_stream.clear_data();
+                broadcast_stream.write(Byte(0));
+                broadcast_stream.write(Byte(255));
+                broadcast_stream.write(world_state.m_welcome_string);
+                //create a packet and send
+        	    ENetPacket* packet = enet_packet_create (broadcast_stream.data(), broadcast_stream.size(), ENET_PACKET_FLAG_RELIABLE);
+				enet_peer_send (event.peer, 0, packet);
+			    enet_host_flush (host.load());
+            }
+            break;
+            case ENET_EVENT_TYPE_RECEIVE:
+            {
                 //call the action that corrosponds with the first byte
                 //see the READEME
                 actions[event.packet->data[0]](&event);
@@ -93,76 +88,209 @@ int main(int argc, char const *argv[])
 	return 0;
 }
 
-void takeInput(){
-    char message[512];
+void takeInput()
+{
     char buffer[510];
     while (run.load()){
-        memset(message, 0, 512);
+        DataStream stream(1024);
         memset(buffer, 0, 510);
         fgets(buffer, 510, stdin);
         //get rid of that pesky \n
         char* temp = buffer+strlen(buffer)-1;
         *temp = '\0';
-        message[0] = 0; // set the packet type to message
-        message[1] = 255; // set the ID to 255, this is reserved for the server
-        if(strcmp(buffer, "") != 0){
+        stream.write(Byte(0)); // this is a 0 action!
+        stream.write(Byte(255)); // set the ID to 255, this is reserved for the server
+        if(strcmp(buffer, "") != 0)
+        {
             // controller->takeInput(buffer);
-            if(strcmp(buffer, "exit") == 0){
+            if(strcmp(buffer, "exit") == 0)
+            {
         		run.store(false);
-        	}else{
-                memcpy(message+2, buffer, 510);
-        	    ENetPacket* packet = enet_packet_create (message, 512, ENET_PACKET_FLAG_RELIABLE);
+        	}else
+            {
+                stream.write(buffer, 510);
+        	    ENetPacket* packet = enet_packet_create (stream.data(), stream.size(), ENET_PACKET_FLAG_RELIABLE);
 			    enet_host_broadcast (host.load(), 0, packet);         
 			    enet_host_flush (host.load());	
 			    printf("\033[1A"); //go up one line
 			    printf("\033[K"); //delete to the end of the line
-			    printf("\rServer: %s\n", message+2); // use \r to get back to the start and print
+			    printf("\rServer: %s\n", stream.data()+2); // use \r to get back to the start and print
         	}
         }
 
     }
 }
 
-void sendBroadcast(){
-    ENetPacket* packet = enet_packet_create (broadcastMessage, 512, ENET_PACKET_FLAG_RELIABLE);
+void sendBroadcast()
+{
+    ENetPacket* packet = enet_packet_create (broadcast_stream.data(), broadcast_stream.size(), ENET_PACKET_FLAG_RELIABLE);
     enet_host_broadcast (host.load(), 0, packet);
     enet_host_flush (host.load());
 }
 
-void userDisconnected(ENetEvent* event){
-    //print the disconnect
-    printf ("%s disconnected.\n", 
-    usernames[*(char*)event->peer->data]);
-    memset(usernames[*(char*)event->peer->data], 0, 510); // remove the username
-    memset(broadcastMessage, 0, 512);
-    broadcastMessage[0] = 2;
-    memcpy(broadcastMessage+1, event->peer->data, 1);
+void userDisconnected(ENetEvent* event)
+{
+    const char user_id = *(char*)event->peer->data;
+    broadcast_stream.clear_data();
+    broadcast_stream.write(Byte(2)); // user disconnected
+    broadcast_stream.write(user_id, 1); // copy user ID, first byte of peer data
     sendBroadcast(); // send the broadcast
     event->peer->data = NULL;
+
+    std::cout << ClientStateForID(user_id).Username() << " disconected." << std::endl;
+
 }
 
-void newUser(ENetEvent* event){
-    memset(broadcastMessage, 0, 512);
-    broadcastMessage[0] = 1;
-    broadcastMessage[1] = *(char*)event->peer->data;
-    memcpy(usernames[*(char*)event->peer->data], event->packet->data+2, 510); // save the new username
-    memcpy(broadcastMessage+2, event->packet->data+2, 510); // copy the new username for broadcast
-    printf("New user with name: %s\n", usernames[*(char*)event->peer->data]);
+void newUser(ENetEvent* event)
+{
+    broadcast_stream.clear_data();
+    broadcast_stream.write(Byte(1));
+
+    //check if we already have a username with this ID
+    const char* event_username = (char*)event->packet->data+2;
+    auto found_user = std::find_if(client_states.begin(), client_states.end(), [event_username](const ClientState& state)
+    {
+        return strcmp(event_username, state.Username().c_str()) == 0;
+    });
+
+    if(found_user != client_states.end())
+    {
+        //write over the peer's id so it's correct for further messages
+        *(char*)event->peer->data = (char)found_user->ID();
+        broadcast_stream.write((char)found_user->ID()); // write the users ID
+        broadcast_stream.write(found_user->Username()); // copy the old username
+        std::cout << "Returning user with id/name: " << found_user->ID() << "/" << found_user->Username() << std::endl;
+    }
+    else
+    {
+        ClientState new_state(*(char*)event->peer->data, (char*)event->packet->data+2);
+        client_states.push_back(new_state);
+
+        broadcast_stream.write((char)new_state.ID()); // write the users ID
+        broadcast_stream.write(new_state.Username()); // copy the new username for broadcast
+        std::cout << "New user with id/name: " << new_state.ID() << "/" << new_state.Username() << std::endl;
+    }
     sendBroadcast();
+
+    //tell the new user about old ones
+    DataStream stream(1024);
+    for(const auto& client : client_states)
+    {
+        stream.clear_data();
+        stream.write(Byte(1)); // new username
+        stream.write(client.ID());
+        stream.write(client.Username());
+        ENetPacket* packet = enet_packet_create (stream.data(), stream.size(), ENET_PACKET_FLAG_RELIABLE);
+        enet_peer_send (event->peer, 0, packet);
+        enet_host_flush (host.load());
+    }
     enet_packet_destroy (event->packet);
 }
 
-void messageRecieved(ENetEvent* event){
-    memset(broadcastMessage, 0, 512);
-    //if they have, just rebroadcast the message
-    //send out the data to everyone else
-    memcpy(broadcastMessage, event->packet->data, 512); // copy the message data
-    broadcastMessage[1] = *(char*)event->peer->data; // stick the id in the second byte
-    //print on the server
-    printf ("%s: %s \n",
-            usernames[broadcastMessage[1]], // the users id
-            broadcastMessage+2 // the users message
-            );
-    sendBroadcast();
+void messageRecieved(ENetEvent* event)
+{
+
+    std::vector<std::string> tokens;
+    std::string input((char*)event->packet->data+2);
+    std::stringstream ss(input);
+    std::string buffer;
+    while(ss >> buffer)
+    {
+        tokens.push_back(buffer);
+    }
+
+    auto found_mud_action = std::find_if(mud_actions.begin(), mud_actions.end(), [tokens](const std::pair<const std::string&, MUDAction>& pair)
+    {
+        return tokens.front() == pair.first;
+    });
+
+    if(found_mud_action != mud_actions.end())
+    {
+        found_mud_action->second(event, tokens);
+    }
+    else
+    {
+        respond_to_sender(event, "This is an unknown action!");
+    }
     enet_packet_destroy (event->packet);
+}
+
+void respond_to_sender(ENetEvent* event, const std::string& str)
+{
+    DataStream stream(1024);
+    stream.clear_data();
+    stream.write(Byte(0)); // new username
+    stream.write(Byte(255));
+    stream.write(str);
+    ENetPacket* packet = enet_packet_create (stream.data(), stream.size(), ENET_PACKET_FLAG_RELIABLE);
+    enet_peer_send (event->peer, 0, packet);
+    enet_host_flush (host.load());
+}
+
+void mud_look(ENetEvent* event, std::vector<std::string> tokens)
+{
+    const ClientState& client = ClientStateForID(*(char*)event->peer->data);
+    const Location& client_loc = world_state.Locations().at(client.LocationID());
+    std::string location;
+    location.append("\n");
+    location.append("----" + client_loc.m_title + "----");
+    location.append("\n");
+    location.append(client_loc.m_description);
+    location.append("\n");
+    location.append("-----------------------\n");
+    if(tokens.size() < 2)
+    {
+        location.append(client_loc.m_here);
+    }
+    else
+    {
+        std::string& param1 = tokens.at(1);
+        if(param1 == "n" || param1 == "north")
+        {
+            location.append(client_loc.m_north);
+        }
+        else if(param1 == "e" || param1 == "east")
+        {
+            location.append(client_loc.m_east);
+        }
+        else if(param1 == "s" || param1 == "south")
+        {
+            location.append(client_loc.m_south);
+        }
+        else if(param1 == "w" || param1 == "west")
+        {
+            location.append(client_loc.m_west);
+        }
+    }
+    respond_to_sender(event, location);
+}
+
+void mud_say(ENetEvent* event, std::vector<std::string> tokens)
+{
+    if(tokens.size() < 2)
+    {
+        respond_to_sender(event, "This action needs parameters!");
+    }
+    else
+    {
+        std::cout << "say" << std::endl;
+    }
+}
+
+void mud_go(ENetEvent* event, std::vector<std::string> tokens)
+{
+    std::cout << "go" << std::endl;
+}
+
+const ClientState& ClientStateForID(char id)
+{
+    auto found_user = std::find_if(client_states.begin(), client_states.end(), [id](const ClientState& state)
+    {
+        return id == (char)state.ID();
+    });
+    if(found_user != client_states.end())
+    {
+        return *found_user;
+    }
+    return ClientState();
 }
