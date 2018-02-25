@@ -331,7 +331,7 @@ void mud_go(ENetEvent* event, std::vector<std::string> tokens)
             {
                 response = "You can't go in that direction.";
             }
-            else if (world_state.Locations().at(client->LocationID()-world_state.m_world_width).m_passable == false)
+            else if (world_state.Locations().at(client->LocationID()-world_state.m_world_width).IsPassable(client) == false)
             {
                 response = "That region is impassable.";
             }
@@ -347,7 +347,7 @@ void mud_go(ENetEvent* event, std::vector<std::string> tokens)
             {
                 response = "You can't go in that direction.";
             }
-            else if (world_state.Locations().at(client->LocationID()+1).m_passable == false)
+            else if (world_state.Locations().at(client->LocationID()+1).IsPassable(client) == false)
             {
                 response = "That region is impassable.";
             }
@@ -363,7 +363,7 @@ void mud_go(ENetEvent* event, std::vector<std::string> tokens)
             {
                 response = "You can't go in that direction.";
             }
-            else if (world_state.Locations().at(client->LocationID()+world_state.m_world_width).m_passable == false)
+            else if (world_state.Locations().at(client->LocationID()+world_state.m_world_width).IsPassable(client) == false)
             {
                 response = "That region is impassable.";
             }
@@ -379,7 +379,7 @@ void mud_go(ENetEvent* event, std::vector<std::string> tokens)
             {
                 response = "You can't go in that direction.";
             }
-            else if (world_state.Locations().at(client->LocationID()-1).m_passable == false)
+            else if (world_state.Locations().at(client->LocationID()-1).IsPassable(client) == false)
             {
                 response = "That region is impassable.";
             }
