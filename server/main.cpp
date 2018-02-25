@@ -252,42 +252,38 @@ void mud_look(ENetEvent* event, std::vector<std::string> tokens)
 {
     ClientState* client = ClientStateForID(*(char*)event->peer->data);
     const Location& client_loc = world_state.Locations().at(client->LocationID());
-    std::string location;
-    location.append("\n");
-    location.append("----" + client_loc.m_title + "----");
-    location.append("\n");
+    std::stringstream ss;
+    ss << "\n ----" << client_loc.m_title << "----" << "\n";
     if(tokens.size() < 2)
     {
-        location.append(client_loc.m_description);
-        location.append("\n");
-        location.append("-----------------------\n");
-        location.append(client_loc.m_here);
+        ss << client_loc.m_description << "\n ----------------------- \n";
+        ss << client_loc.m_here;
     }
     else
     {
         std::string& param1 = tokens.at(1);
         if(param1 == "n" || param1 == "north")
         {
-            location.append(client_loc.m_north);
+            ss << client_loc.m_north;
         }
         else if(param1 == "e" || param1 == "east")
         {
-            location.append(client_loc.m_east);
+            ss << client_loc.m_east;
         }
         else if(param1 == "s" || param1 == "south")
         {
-            location.append(client_loc.m_south);
+            ss << client_loc.m_south;
         }
         else if(param1 == "w" || param1 == "west")
         {
-            location.append(client_loc.m_west);
+            ss << client_loc.m_west;
         }
         else
         {
-            location.append(client_loc.m_here);
+            ss << client_loc.m_here;
         }
     }
-    message_peer(event->peer, location);
+    message_peer(event->peer, ss.str());
 }
 
 //allows players to talk to people at the same location to them
@@ -300,14 +296,21 @@ void mud_say(ENetEvent* event, std::vector<std::string> tokens)
     }
     else
     {
+        std::stringstream ss;
+        ss << client->Username() << ":";
+        //reconstruct from tokens, tbh this could be a lot better...
+        for(int i = 1; i < tokens.size(); ++i)
+        {
+            ss << " " << tokens.at(i);
+        }
+
         for(ClientState& state : client_states)
         {
             if(state.ENetPeer() && client->LocationID() == state.LocationID())
             {
-                message_peer(state.ENetPeer(), tokens.at(1));
+                message_peer(state.ENetPeer(), ss.str());
             }
         }
-        std::cout << "say" << std::endl;
     }
 }
 
@@ -323,13 +326,14 @@ void mud_go(ENetEvent* event, std::vector<std::string> tokens)
     }
     else
     {
+        const std::string invalid_direction = "You can't go in that direction";
         std::string response;
         std::string& param1 = tokens.at(1);
         if(param1 == "n" || param1 == "north")
         {
             if(client->LocationID() < world_state.m_world_width)
             {
-                response = "You can't go in that direction.";
+                response = invalid_direction;
             }
             else if (world_state.Locations().at(client->LocationID()-world_state.m_world_width).IsPassable(client) == false)
             {
@@ -345,7 +349,7 @@ void mud_go(ENetEvent* event, std::vector<std::string> tokens)
         {
             if((client->LocationID()+1) % world_state.m_world_width == 0)
             {
-                response = "You can't go in that direction.";
+                response = invalid_direction;
             }
             else if (world_state.Locations().at(client->LocationID()+1).IsPassable(client) == false)
             {
@@ -361,7 +365,7 @@ void mud_go(ENetEvent* event, std::vector<std::string> tokens)
         {
             if((client->LocationID() / world_state.m_world_height) >= world_state.m_world_height)
             {
-                response = "You can't go in that direction.";
+                response = invalid_direction;
             }
             else if (world_state.Locations().at(client->LocationID()+world_state.m_world_width).IsPassable(client) == false)
             {
@@ -377,7 +381,7 @@ void mud_go(ENetEvent* event, std::vector<std::string> tokens)
         {
             if(client->LocationID() % world_state.m_world_width == 0)
             {
-                response = "You can't go in that direction.";
+                response = invalid_direction;
             }
             else if (world_state.Locations().at(client->LocationID()-1).IsPassable(client) == false)
             {
@@ -397,18 +401,15 @@ void mud_go(ENetEvent* event, std::vector<std::string> tokens)
 //prints a bunch of commands, should probably just be in data somewhere but eh
 void mud_help(ENetEvent* event, std::vector<std::string>)
 {
-    std::string help_str = "\n";
-    help_str.append("You can use the following commands:");
-    help_str.append("\n");
-    help_str.append("go <direction>");
-    help_str.append("\n");
-    help_str.append("look (direction)");
-    help_str.append("\n");
-    help_str.append("say <message>");
-    help_str.append("\n");
-    help_str.append("exit");
+    std::stringstream ss;
+    ss << "\n";
+    ss << "You can use the following commands:" << "\n";
+    ss << "go <direction>" << "\n";
+    ss << "look (direction)" << "\n";
+    ss << "say <message>" << "\n";
+    ss << "exit";
 
-    message_peer(event->peer, help_str);
+    message_peer(event->peer, ss.str());
 }
 
 //returns a client state for an ID
