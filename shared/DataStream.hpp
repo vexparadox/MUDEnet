@@ -54,6 +54,17 @@ public:
 		memset((void*)m_data, 0, m_data_size);
 	}
 
+	bool skip_forwards(size_t jump_size)
+	{
+		if(m_head+jump_size <= m_data+m_data_size)
+		{
+			m_head += jump_size;
+			return true;
+		}
+		std::cout << "Attempt to skip past the end of a data stream" << std::endl;
+		return false;
+	}
+
 	template <typename T>
 	bool read(T& t)
 	{
@@ -63,8 +74,21 @@ public:
 			m_head += sizeof(t);
 			return true;
 		}
-		std::cout << "Attempt to write invalid memory size to data stream" << std::endl;
+		std::cout << "Attempt to read invalid memory size to data stream" << std::endl;
 		return false;
+	}
+
+	template <typename T>
+	T* read()
+	{
+		if(m_head+sizeof(T) <= m_data+m_data_size)
+		{
+			T* t = (T*)m_head;
+			m_head += sizeof(t);
+			return t;
+		}
+		std::cout << "Attempt to read invalid memory size to data stream" << std::endl;
+		return nullptr;
 	}
 
 	bool write(const std::string& str)

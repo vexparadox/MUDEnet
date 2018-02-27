@@ -151,8 +151,9 @@ void userDisconnected(ENetEvent* event)
 //We check for a matching client state or create a new one for this user
 void newUser(ENetEvent* event)
 {
-    broadcast_stream.clear_data();
-    broadcast_stream.write(Byte(1));
+    //prep a stream to send back to the new user with their unique ID
+    DataStream stream(1024);
+    stream.write(Byte(1));
 
     //check if we already have a username with this ID
     const char* event_username = (char*)event->packet->data+2;
@@ -165,35 +166,23 @@ void newUser(ENetEvent* event)
     {
         //write over the peer's id so it's correct for further messages
         *(char*)event->peer->data = (char)found_user->ID();
-        broadcast_stream.write((char)found_user->ID()); // write the users ID
-        broadcast_stream.write(found_user->Username()); // copy the old username
         found_user->SetENetPeer(event->peer);
+        stream.write((char)found_user->ID()); // write the users ID
         std::cout << "Returning user with id/name: " << found_user->ID() << "/" << found_user->Username() << std::endl;
     }
     else
     {
         ClientState new_state(*(char*)event->peer->data, (char*)event->packet->data+2);
         new_state.SetENetPeer(event->peer);
-        client_states.push_back(new_state);
-
-        broadcast_stream.write((char)new_state.ID()); // write the users ID
-        broadcast_stream.write(new_state.Username()); // copy the new username for broadcast
+        stream.write(new_state.ID());
         std::cout << "New user with id/name: " << new_state.ID() << "/" << new_state.Username() << std::endl;
+        client_states.emplace_back(std::move(new_state));
     }
-    sendBroadcast();
 
-    //tell the new user about old ones
-    DataStream stream(1024);
-    for(const auto& client : client_states)
-    {
-        stream.clear_data();
-        stream.write(Byte(1)); // new username
-        stream.write(client.ID());
-        stream.write(client.Username());
-        ENetPacket* packet = enet_packet_create (stream.data(), stream.size(), ENET_PACKET_FLAG_RELIABLE);
-        enet_peer_send (event->peer, 0, packet);
-        enet_host_flush (host.load());
-    }    
+    //tell the new user about their UniqueID
+    ENetPacket* packet = enet_packet_create (stream.data(), stream.size(), ENET_PACKET_FLAG_RELIABLE);
+    enet_peer_send (event->peer, 0, packet);
+    enet_host_flush (host.load());
 
     //send the user the information for where they currently are
     mud_look(event, std::vector<std::string>());
@@ -205,6 +194,16 @@ void newUser(ENetEvent* event)
 //we evaluate ad a MUDAction and split the string into tokens
 void messageRecieved(ENetEvent* event)
 {
+    //verify the UserID first!
+    DataStream stream((Byte*)event->packet->data, 2);
+    stream.skip_forwards(1);
+    char id = *stream.read<char>();
+    if(ClientStateForID(id) == nullptr)
+    {
+        message_peer(event->peer, "Invalid Client ID, try logging out and in again!");
+        return;
+    }
+
     //Ha! I love C++
     std::vector<std::string> tokens;
     std::string input((char*)event->packet->data+2);
@@ -238,7 +237,7 @@ void message_peer(ENetPeer* peer, const std::string& str)
     //sends as a message from the server to the client, the client should just print this
     DataStream stream(1024);
     stream.clear_data();
-    stream.write(Byte(0)); // new username
+    stream.write(Byte(0)); // Server to client message
     stream.write(Byte(255));
     stream.write(str);
     ENetPacket* packet = enet_packet_create (stream.data(), stream.size(), ENET_PACKET_FLAG_RELIABLE);

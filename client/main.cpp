@@ -60,7 +60,8 @@ int main(int argc, char const *argv[])
             switch (event.type)
             {
             case ENET_EVENT_TYPE_RECEIVE:{
-                actions[event.packet->data[0]](&event);
+                if()
+                actions[event->packet->data[0]](&event);
             }break;
             case ENET_EVENT_TYPE_DISCONNECT:
                 // printf ("%s disconnected.\n", usernames[*(char*)event.peer->data]);
@@ -114,7 +115,7 @@ void takeInput()
         *temp = '\0';
         //set the params of the message
         message[0] = 0; // tell the server it's a message
-        message[1] = 0; // the second byte is ignored by the server, it's filled with the userID when it's resent out
+        message[1] = current_user_id; // for all messages we have to give back the unique ID we got back from the server
         if(strcmp(buffer, "") != 0){
             if(strcmp(buffer, "exit") == 0){
         		running.store(false);
@@ -137,9 +138,11 @@ void messageRecieved(ENetEvent* event){
 }
 
 //occurs when new clients connect to the server
-void newUser(ENetEvent* event){
-    //save the username that was given by the server
-    //memcpy(usernames[event->packet->data[1]], event->packet->data+2, 510); 
+void uniqueID(ENetEvent* event){
+    DataStream stream((Byte*)event->packet->data, 1024);
+    stream.skip_forwards(1); // jump the first byte
+    stream.read(current_user_id);
+    std::cout << " new user id" << (int)current_user_id << std::endl;
     enet_packet_destroy (event->packet);
 }
 
