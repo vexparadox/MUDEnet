@@ -37,7 +37,7 @@ Action actions[] = {
 WorldState world_state;
 ClientState* ClientStateForID(char id);
 std::vector<ClientState> client_states;
-std::vector<std::pair<const std::string&, MUDAction>> mud_actions;
+std::vector<std::pair<std::string, MUDAction>> mud_actions;
 
 void message_peer(ENetPeer* peer, const std::string& str);
 void mud_look(ENetEvent* event, std::vector<std::string>);

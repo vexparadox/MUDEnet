@@ -60,8 +60,7 @@ int main(int argc, char const *argv[])
             switch (event.type)
             {
             case ENET_EVENT_TYPE_RECEIVE:{
-                if()
-                actions[event->packet->data[0]](&event);
+                actions[event.packet->data[0]](&event);
             }break;
             case ENET_EVENT_TYPE_DISCONNECT:
                 // printf ("%s disconnected.\n", usernames[*(char*)event.peer->data]);

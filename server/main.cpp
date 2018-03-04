@@ -305,9 +305,9 @@ void mud_say(ENetEvent* event, std::vector<std::string> tokens)
 
         for(ClientState& state : client_states)
         {
-            if(state.ENetPeer() && client->LocationID() == state.LocationID())
+            if(state.Peer() && client->LocationID() == state.LocationID())
             {
-                message_peer(state.ENetPeer(), ss.str());
+                message_peer(state.Peer(), ss.str());
             }
         }
     }
