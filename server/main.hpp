@@ -22,15 +22,15 @@ std::atomic<bool> run; //the running bool
 //Enet actions
 char clientCount; // the current count of users
 DataStream broadcast_stream(1024);
-void takeInput();
-void messageRecieved(ENetEvent* event);
-void newUser(ENetEvent* event);
-void userDisconnected(ENetEvent* event);
-void sendBroadcast();
+void take_input();
+void message_recieved(ENetEvent* event);
+void new_user(ENetEvent* event);
+void user_disconnected(ENetEvent* event);
+void send_broadcast();
 //a list of actions
 Action actions[] = {
-	messageRecieved,
-	newUser
+	message_recieved,
+	new_user
 };
 
 //MUD code
