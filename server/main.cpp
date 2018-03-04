@@ -105,7 +105,12 @@ void take_input()
             if(strcmp(buffer, "exit") == 0)
             {
         		run.store(false);
-        	}else
+        	}
+            else if(strcmp(buffer, "list") == 0)
+            {
+                print_users();
+            }
+            else
             {
                 stream.write(buffer, 510);
         	    ENetPacket* packet = enet_packet_create (stream.data(), stream.size(), ENET_PACKET_FLAG_RELIABLE);
@@ -145,6 +150,18 @@ void user_disconnected(ENetEvent* event)
 
     std::cout << ClientStateForID(user_id)->Username() << " disconected." << std::endl;
 
+}
+
+void print_users()
+{
+    std::cout << "Online Users: " << std::endl;
+    for(ClientState& state : client_states)
+    {
+        if(state.Peer())
+        {
+            std::cout << state.Username() << std::endl;
+        }
+    }
 }
 
 //Function called when a new user connects to the server

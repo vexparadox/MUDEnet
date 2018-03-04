@@ -2,6 +2,7 @@
 #include "ClientState.hpp"
 #include "WorldState.hpp"
 #include "../shared/DataStream.hpp"
+#include "../shared/md5.hpp"
 #include <memory>
 #include <vector>
 #include <stdio.h>
@@ -27,6 +28,8 @@ void message_recieved(ENetEvent* event);
 void new_user(ENetEvent* event);
 void user_disconnected(ENetEvent* event);
 void send_broadcast();
+void print_users();
+
 //a list of actions
 Action actions[] = {
 	message_recieved,
