@@ -35,14 +35,14 @@ B1 is the ID of the packets action, this can be used in a switch or array of fun
 ### Server to Client packets:
 |      Name      | B1 |   B2  | B3 to B1024     |                                         Notes                                        |
 |:--------------:|:--:|:-----:|-----------------|:------------------------------------------------------------------------------------:|
-|     Message    |  0 | 0-255 | Message Content | B2 is userID followed by message.        |
-| New user |  1 | 0-255 | Username        | B2 is userID, following bytes by username given. |
+|     Message    |  0 | 255 | Message Content | The client prints this message.        |
+| New user |  1 | 0-255 | Username        | B2 is userID, this is the clients secret ID they use to communicate with the server. |
 | User disconnected |  2 | 0-255 | NULL        | B2 has disconnected |
 
 ### Client to Server packets:
 Note that B2 is used for UserIDs, the Client doesn't need to know about its own ID. This will be filled by the server. Leave B2 empty for clarity, it's ignored by the Server anyway.
 
-|   Name  | B1 |  B2  | B3 to B512      |                         Notes                        |
+|   Name  | B1 |  B2  | B3 to B1024      |                         Notes                        |
 |:-------:|:--:|:----:|-----------------|:----------------------------------------------------:|
-| Message |  0 | NULL | Message Content | B2 is filled by the Server when broadcast to clients |
-| Username |  1 | NULL | Username | B3-B510 is saved and broadcast to other clients (only sent once!)|
+| Message |  0 | NULL | Message Content | Used to send commands to the server |
+| Username |  1 | NULL | Username | B3-B510 used as a login and retrieve the existing/new client state. A unique ID will be returned to this user only!|
