@@ -50,14 +50,8 @@ int main(int argc, char const *argv[])
             case ENET_EVENT_TYPE_CONNECT:
             {
                 std::cout << std::endl << "A new player connected from " << event.peer->address.host << ":" << event.peer->address.port << std::endl;
-                broadcast_stream.clear_data();
-                broadcast_stream.write(Byte(0));
-                broadcast_stream.write(Byte(255));
-                broadcast_stream.write(world_state.m_welcome_string);
-                //create a packet and send
-        	    ENetPacket* packet = enet_packet_create (broadcast_stream.data(), broadcast_stream.size(), ENET_PACKET_FLAG_RELIABLE);
-				enet_peer_send (event.peer, 0, packet);
-			    enet_host_flush (host.load());
+                //send the welcome string
+                message_peer(event.peer, world_state.m_welcome_string);
             }
             break;
             case ENET_EVENT_TYPE_RECEIVE:
@@ -126,8 +120,12 @@ void take_input()
 }
 
 //broadcast to all players in the server
-void send_broadcast()
+void send_broadcast(const std::string& message)
 {
+    DataStream broadcast_stream(1024);
+    broadcast_stream.write(Byte(0));
+    broadcast_stream.write(Byte(255));
+    broadcast_stream.write(message);
     ENetPacket* packet = enet_packet_create (broadcast_stream.data(), broadcast_stream.size(), ENET_PACKET_FLAG_RELIABLE);
     enet_host_broadcast (host.load(), 0, packet);
     enet_host_flush (host.load());
@@ -140,13 +138,10 @@ void user_disconnected(ENetEvent* event)
     ClientState* client_state = (ClientState*)event->peer->data;
     client_state->SetENetPeer(nullptr);
 
-    broadcast_stream.clear_data();
-    broadcast_stream.write(Byte(0));
-    broadcast_stream.write(Byte(255));
     std::string disconected_string = client_state->Username();
     disconected_string.append(" disconected.");
-    broadcast_stream.write(disconected_string); // copy user ID, first byte of peer data
-    send_broadcast(); // send the broadcast
+    send_broadcast(disconected_string);
+
     event->peer->data = nullptr;
     std::cout << client_state->Username() << " disconected." << std::endl;
 

@@ -21,12 +21,11 @@ std::atomic<ENetHost*> host; // the Enet Host
 std::atomic<bool> run; //the running bool
 
 //Enet actions
-DataStream broadcast_stream(1024);
 void take_input();
 void message_recieved(ENetEvent* event);
 void new_user(ENetEvent* event);
 void user_disconnected(ENetEvent* event);
-void send_broadcast();
+void send_broadcast(const std::string&);
 void print_users();
 
 //a list of actions
