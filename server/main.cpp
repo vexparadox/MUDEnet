@@ -13,7 +13,6 @@ int main(int argc, char const *argv[])
         std::cout << "No address or port was supplied." << std::endl;
     	return 1;
     }
-	clientCount = 0;
     enet_address_set_host(&serverAddress, argv[1]);
     serverAddress.port = atoi(argv[2]);
 
@@ -51,12 +50,6 @@ int main(int argc, char const *argv[])
             case ENET_EVENT_TYPE_CONNECT:
             {
                 std::cout << std::endl << "A new player connected from " << event.peer->address.host << ":" << event.peer->address.port << std::endl;
-                //make space for the new users ID
-				event.peer->data = malloc(sizeof(char));
-                //write the new client Count
-				*(char*)event.peer->data = clientCount;
-				clientCount++; // increment the id
-
                 broadcast_stream.clear_data();
                 broadcast_stream.write(Byte(0));
                 broadcast_stream.write(Byte(255));
@@ -136,10 +129,8 @@ void send_broadcast()
 //called when a user disconnects
 void user_disconnected(ENetEvent* event)
 {
-    const char user_id = *(char*)event->peer->data;
-
     //clear the client's enet peer, this is so we know they're logged in
-    ClientState* client_state = ClientStateForID(user_id);
+    ClientState* client_state = (ClientState*)event->peer->data;
     client_state->SetENetPeer(nullptr);
 
     broadcast_stream.clear_data();
@@ -149,8 +140,6 @@ void user_disconnected(ENetEvent* event)
     disconected_string.append(" disconected.");
     broadcast_stream.write(disconected_string); // copy user ID, first byte of peer data
     send_broadcast(); // send the broadcast
-
-    delete((char*)event->peer->data);
     event->peer->data = nullptr;
     std::cout << client_state->Username() << " disconected." << std::endl;
 
@@ -159,11 +148,11 @@ void user_disconnected(ENetEvent* event)
 void print_users()
 {
     std::cout << "Online Users: " << std::endl;
-    for(ClientState& state : client_states)
+    for(ClientState* state : client_states)
     {
-        if(state.Peer())
+        if(state && state->Peer())
         {
-            std::cout << state.Username() << std::endl;
+            std::cout << state->Username() << std::endl;
         }
     }
 }
@@ -178,26 +167,27 @@ void new_user(ENetEvent* event)
 
     //check if we already have a username with this ID
     const char* event_username = (char*)event->packet->data+2;
-    auto found_user = std::find_if(client_states.begin(), client_states.end(), [event_username](const ClientState& state)
+    auto found_user = std::find_if(client_states.begin(), client_states.end(), [event_username](const ClientState* state)
     {
-        return strcmp(event_username, state.Username().c_str()) == 0;
+        return strcmp(event_username, state->Username().c_str()) == 0;
     });
 
     if(found_user != client_states.end())
     {
         //write over the peer's id so it's correct for further messages
-        *(char*)event->peer->data = (char)found_user->ID();
-        found_user->SetENetPeer(event->peer);
-        stream.write((char)found_user->ID()); // write the users ID
-        std::cout << "Returning user with id/name: " << found_user->ID() << "/" << found_user->Username() << std::endl;
+        event->peer->data = (void*)(*found_user);
+        (*found_user)->SetENetPeer(event->peer);
+        stream.write((char)(*found_user)->ID()); // write the users ID
+        std::cout << "Returning user with id/name: " << (*found_user)->ID() << "/" << (*found_user)->Username() << std::endl;
     }
     else
     {
-        ClientState new_state(*(char*)event->peer->data, (char*)event->packet->data+2);
-        new_state.SetENetPeer(event->peer);
-        stream.write(new_state.ID());
-        std::cout << "New user with id/name: " << new_state.ID() << "/" << new_state.Username() << std::endl;
-        client_states.emplace_back(std::move(new_state));
+        ClientState* new_state = new ClientState(client_states.size(), (char*)event->packet->data+2);
+        new_state->SetENetPeer(event->peer);
+        event->peer->data = (void*)new_state;
+        stream.write(new_state->ID());
+        std::cout << "New user with id/name: " << new_state->ID() << "/" << new_state->Username() << std::endl;
+        client_states.emplace_back(new_state);
     }
 
     //tell the new user about their UniqueID
@@ -218,8 +208,8 @@ void message_recieved(ENetEvent* event)
     //verify the UserID first!
     DataStream stream((Byte*)event->packet->data, 2);
     stream.skip_forwards(1);
-    char id = *stream.read<char>();
-    if(ClientStateForID(id) == nullptr)
+    const char id = *stream.read<char>(); // read the ID given by the user to the server
+    if(((ClientState*)event->peer->data)->ID() != id)
     {
         message_peer(event->peer, "Invalid Client ID, try logging out and in again!");
         return;
@@ -270,7 +260,7 @@ void message_peer(ENetPeer* peer, const std::string& str)
 //sends the player strings describing their current location and directions relative to it
 void mud_look(ENetEvent* event, std::vector<std::string> tokens)
 {
-    ClientState* client = ClientStateForID(*(char*)event->peer->data);
+    ClientState* client = (ClientState*)event->peer->data;
     const Location& client_loc = world_state.Locations().at(client->LocationID());
     std::stringstream ss;
     ss << "\n ----" << client_loc.m_title << "----" << "\n";
@@ -309,7 +299,7 @@ void mud_look(ENetEvent* event, std::vector<std::string> tokens)
 //allows players to talk to people at the same location to them
 void mud_say(ENetEvent* event, std::vector<std::string> tokens)
 {
-    ClientState* client = ClientStateForID(*(char*)event->peer->data);
+    ClientState* client = (ClientState*)event->peer->data;
     if(tokens.size() < 2)
     {
         message_peer(event->peer, "This action needs parameters, try using help!");
@@ -324,11 +314,11 @@ void mud_say(ENetEvent* event, std::vector<std::string> tokens)
             ss << " " << tokens.at(i);
         }
 
-        for(ClientState& state : client_states)
+        for(ClientState* state : client_states)
         {
-            if(state.Peer() && client->LocationID() == state.LocationID())
+            if(state->Peer() && client->LocationID() == state->LocationID())
             {
-                message_peer(state.Peer(), ss.str());
+                message_peer(state->Peer(), ss.str());
             }
         }
     }
@@ -338,7 +328,7 @@ void mud_say(ENetEvent* event, std::vector<std::string> tokens)
 //checks if in the map, if passable, and then applies the move their client state
 void mud_go(ENetEvent* event, std::vector<std::string> tokens)
 {
-    ClientState* client = ClientStateForID(*(char*)event->peer->data);
+    ClientState* client = (ClientState*)event->peer->data;
     const Location& client_loc = world_state.Locations().at(client->LocationID());
     if(tokens.size() < 2)
     {
@@ -430,20 +420,4 @@ void mud_help(ENetEvent* event, std::vector<std::string>)
     ss << "exit";
 
     message_peer(event->peer, ss.str());
-}
-
-//returns a client state for an ID
-//returns nullptr if there's none found
-ClientState* ClientStateForID(char id)
-{
-    auto found_user = std::find_if(client_states.begin(), client_states.end(), [id](const ClientState& state)
-    {
-        return id == (char)state.ID();
-    });
-    if(found_user != client_states.end())
-    {
-        return &(*found_user);
-    }
-    std::cout << "User for the ID " << (int)id << " not found!" << std::endl;
-    return nullptr;
 }

@@ -21,7 +21,6 @@ std::atomic<ENetHost*> host; // the Enet Host
 std::atomic<bool> run; //the running bool
 
 //Enet actions
-char clientCount; // the current count of users
 DataStream broadcast_stream(1024);
 void take_input();
 void message_recieved(ENetEvent* event);
@@ -38,8 +37,7 @@ Action actions[] = {
 
 //MUD code
 WorldState world_state;
-ClientState* ClientStateForID(char id);
-std::vector<ClientState> client_states;
+std::vector<ClientState*> client_states;
 std::vector<std::pair<std::string, MUDAction>> mud_actions;
 
 void message_peer(ENetPeer* peer, const std::string& str);

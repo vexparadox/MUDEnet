@@ -101,12 +101,13 @@ void getUsername()
 void takeInput()
 {
     DataStream stream(1024);
-	char buffer[510];
+	char buffer[1022];
     while (running.load()){
         //clear the buffer and message
-        memset(buffer, 0, 510);
+        stream.clear_data();
+        memset(buffer, 0, 1022);
         //get the buffer
-        fgets(buffer, 510, stdin);
+        fgets(buffer, 1022, stdin);
         //get rid of that pesky \n
         char* temp = buffer+strlen(buffer)-1;
         *temp = '\0';
@@ -117,7 +118,7 @@ void takeInput()
             if(strcmp(buffer, "exit") == 0){
         		running.store(false);
         	}else{
-				stream.write(buffer, 510);
+				stream.write(buffer, 1022);
         	    ENetPacket* packet = enet_packet_create (stream.data(), stream.size(), ENET_PACKET_FLAG_RELIABLE);
 			    enet_peer_send (server.load(), 0, packet);         
 			    enet_host_flush (client.load());
