@@ -78,6 +78,13 @@ int main(int argc, char const *argv[])
 
     enet_host_destroy(host);
     inputThread.join();
+
+    for(ClientState* state : client_states)
+    {
+        delete state;
+        state = nullptr;
+    }
+
 	return 0;
 }
 
