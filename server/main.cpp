@@ -38,7 +38,7 @@ int main(int argc, char const *argv[])
     std::cout << "Server was started on " << argv[1] << ":" << argv[2] << std::endl;
 
     //start input thread
-    std::thread inputThread(&takeInput);
+    std::thread inputThread(&take_input);
 
     while(run.load()){
         ENetEvent event;
@@ -74,7 +74,7 @@ int main(int argc, char const *argv[])
                 actions[event.packet->data[0]](&event);
             }break;
             case ENET_EVENT_TYPE_DISCONNECT:
-                userDisconnected(&event);
+                user_disconnected(&event);
                 break;
             case ENET_EVENT_TYPE_NONE:
                 break;
@@ -88,7 +88,7 @@ int main(int argc, char const *argv[])
 	return 0;
 }
 
-void takeInput()
+void take_input()
 {
     char buffer[510];
     while (run.load()){
@@ -105,7 +105,12 @@ void takeInput()
             if(strcmp(buffer, "exit") == 0)
             {
         		run.store(false);
-        	}else
+        	}
+            else if(strcmp(buffer, "list") == 0)
+            {
+                print_users();
+            }
+            else
             {
                 stream.write(buffer, 510);
         	    ENetPacket* packet = enet_packet_create (stream.data(), stream.size(), ENET_PACKET_FLAG_RELIABLE);
@@ -121,7 +126,7 @@ void takeInput()
 }
 
 //broadcast to all players in the server
-void sendBroadcast()
+void send_broadcast()
 {
     ENetPacket* packet = enet_packet_create (broadcast_stream.data(), broadcast_stream.size(), ENET_PACKET_FLAG_RELIABLE);
     enet_host_broadcast (host.load(), 0, packet);
@@ -129,7 +134,7 @@ void sendBroadcast()
 }
 
 //called when a user disconnects
-void userDisconnected(ENetEvent* event)
+void user_disconnected(ENetEvent* event)
 {
     const char user_id = *(char*)event->peer->data;
 
@@ -140,16 +145,28 @@ void userDisconnected(ENetEvent* event)
     broadcast_stream.clear_data();
     broadcast_stream.write(Byte(2)); // user disconnected
     broadcast_stream.write(Byte(user_id)); // copy user ID, first byte of peer data
-    sendBroadcast(); // send the broadcast
+    send_broadcast(); // send the broadcast
     event->peer->data = nullptr;
 
     std::cout << ClientStateForID(user_id)->Username() << " disconected." << std::endl;
 
 }
 
+void print_users()
+{
+    std::cout << "Online Users: " << std::endl;
+    for(ClientState& state : client_states)
+    {
+        if(state.Peer())
+        {
+            std::cout << state.Username() << std::endl;
+        }
+    }
+}
+
 //Function called when a new user connects to the server
 //We check for a matching client state or create a new one for this user
-void newUser(ENetEvent* event)
+void new_user(ENetEvent* event)
 {
     //prep a stream to send back to the new user with their unique ID
     DataStream stream(1024);
@@ -192,7 +209,7 @@ void newUser(ENetEvent* event)
 
 //When a message is recieved from the player
 //we evaluate ad a MUDAction and split the string into tokens
-void messageRecieved(ENetEvent* event)
+void message_recieved(ENetEvent* event)
 {
     //verify the UserID first!
     DataStream stream((Byte*)event->packet->data, 2);
@@ -305,9 +322,9 @@ void mud_say(ENetEvent* event, std::vector<std::string> tokens)
 
         for(ClientState& state : client_states)
         {
-            if(state.ENetPeer() && client->LocationID() == state.LocationID())
+            if(state.Peer() && client->LocationID() == state.LocationID())
             {
-                message_peer(state.ENetPeer(), ss.str());
+                message_peer(state.Peer(), ss.str());
             }
         }
     }

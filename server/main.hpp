@@ -2,6 +2,7 @@
 #include "ClientState.hpp"
 #include "WorldState.hpp"
 #include "../shared/DataStream.hpp"
+#include "../shared/md5.hpp"
 #include <memory>
 #include <vector>
 #include <stdio.h>
@@ -22,22 +23,24 @@ std::atomic<bool> run; //the running bool
 //Enet actions
 char clientCount; // the current count of users
 DataStream broadcast_stream(1024);
-void takeInput();
-void messageRecieved(ENetEvent* event);
-void newUser(ENetEvent* event);
-void userDisconnected(ENetEvent* event);
-void sendBroadcast();
+void take_input();
+void message_recieved(ENetEvent* event);
+void new_user(ENetEvent* event);
+void user_disconnected(ENetEvent* event);
+void send_broadcast();
+void print_users();
+
 //a list of actions
 Action actions[] = {
-	messageRecieved,
-	newUser
+	message_recieved,
+	new_user
 };
 
 //MUD code
 WorldState world_state;
 ClientState* ClientStateForID(char id);
 std::vector<ClientState> client_states;
-std::vector<std::pair<const std::string&, MUDAction>> mud_actions;
+std::vector<std::pair<std::string, MUDAction>> mud_actions;
 
 void message_peer(ENetPeer* peer, const std::string& str);
 void mud_look(ENetEvent* event, std::vector<std::string>);
