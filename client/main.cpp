@@ -60,8 +60,7 @@ int main(int argc, char const *argv[])
             switch (event.type)
             {
             case ENET_EVENT_TYPE_RECEIVE:{
-                if()
-                actions[event->packet->data[0]](&event);
+                actions[event.packet->data[0]](&event);
             }break;
             case ENET_EVENT_TYPE_DISCONNECT:
                 // printf ("%s disconnected.\n", usernames[*(char*)event.peer->data]);
@@ -81,47 +80,45 @@ int main(int argc, char const *argv[])
 void getUsername()
 {
     char buffer[510];
-    char message[512];
     memset(buffer, 0, 510);
-    memset(message, 0, 512);
+	DataStream stream(1024);
     do{
         printf("Username: ");
         fgets(buffer, 510, stdin);
     }while(strlen(buffer) <= 1);
 
-    message[0] = 1; // set this to a 1, means a new user
+	stream.write(Byte(1)); // set this to a 1, means a new user
     char* temp = buffer+strlen(buffer)-1; // remove the \n
     *temp = '\0';
     //copy the username to the buffer
-    memcpy(message+2, buffer, 510);
-    //send the username
-    ENetPacket* packet = enet_packet_create (message, 512, ENET_PACKET_FLAG_RELIABLE);
+	stream.skip_forwards(1);
+	stream.write(buffer, 510);
+    ENetPacket* packet = enet_packet_create (stream.data(), stream.size(), ENET_PACKET_FLAG_RELIABLE);
     enet_peer_send (server.load(), 0, packet);         
     enet_host_flush (client.load());
 }
 
 void takeInput()
 {
-    char message[512];
-    char buffer[510];
+    DataStream stream(1024);
+	char buffer[510];
     while (running.load()){
         //clear the buffer and message
         memset(buffer, 0, 510);
-        memset(message, 0, 512);
         //get the buffer
         fgets(buffer, 510, stdin);
         //get rid of that pesky \n
         char* temp = buffer+strlen(buffer)-1;
         *temp = '\0';
         //set the params of the message
-        message[0] = 0; // tell the server it's a message
-        message[1] = current_user_id; // for all messages we have to give back the unique ID we got back from the server
+		stream.write(Byte(0));
+		stream.write(current_user_id);
         if(strcmp(buffer, "") != 0){
             if(strcmp(buffer, "exit") == 0){
         		running.store(false);
         	}else{
-                memcpy(message+2, buffer, 510); // copy the buffered string into the message
-        	    ENetPacket* packet = enet_packet_create (message, 512, ENET_PACKET_FLAG_RELIABLE);
+				stream.write(buffer, 510);
+        	    ENetPacket* packet = enet_packet_create (stream.data(), stream.size(), ENET_PACKET_FLAG_RELIABLE);
 			    enet_peer_send (server.load(), 0, packet);         
 			    enet_host_flush (client.load());
 			    printf("\033[1A"); //go up one line
@@ -133,7 +130,8 @@ void takeInput()
 
 void messageRecieved(ENetEvent* event){
     //print the packet
-    printf ("%s\n", event->packet->data+2);
+	DataStream stream(event->packet->data, 1024);
+    printf ("%s\n", stream.data()+2);
     enet_packet_destroy (event->packet);
 }
 
