@@ -19,11 +19,7 @@ This is a MUD built using Enet in C++!
 * Improve the DataStream and use in the neglected Client code for clarity
 
 ## Requirements & Setup
-If you're compiling from scratch you'll need the Enet library to be linked, http://enet.bespin.org. On Linux and OSX it's a simple make install process, it's also available on HomeBrew `brew install enet`.
-
-If you're using the pre-compiled OSX Standalone, skip to the second step
-
-* To build on OSX (standalone included) and Linux use the makefile provided.
+Run the "make_all.sh" script to install enet and build the binaries :)
 
 * Start using `./output ip port`
 
