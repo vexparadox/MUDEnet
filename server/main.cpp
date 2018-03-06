@@ -143,12 +143,16 @@ void user_disconnected(ENetEvent* event)
     client_state->SetENetPeer(nullptr);
 
     broadcast_stream.clear_data();
-    broadcast_stream.write(Byte(2)); // user disconnected
-    broadcast_stream.write(Byte(user_id)); // copy user ID, first byte of peer data
+    broadcast_stream.write(Byte(0));
+    broadcast_stream.write(Byte(255));
+    std::string disconected_string = client_state->Username();
+    disconected_string.append(" disconected.");
+    broadcast_stream.write(disconected_string); // copy user ID, first byte of peer data
     send_broadcast(); // send the broadcast
-    event->peer->data = nullptr;
 
-    std::cout << ClientStateForID(user_id)->Username() << " disconected." << std::endl;
+    delete((char*)event->peer->data);
+    event->peer->data = nullptr;
+    std::cout << client_state->Username() << " disconected." << std::endl;
 
 }
 
