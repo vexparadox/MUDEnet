@@ -28,6 +28,8 @@ void user_disconnected(ENetEvent* event);
 void send_broadcast(const std::string&);
 void print_users();
 
+std::vector<std::pair<std::string, std::string>> command_history;
+
 //a list of actions
 Action actions[] = {
 	message_recieved,

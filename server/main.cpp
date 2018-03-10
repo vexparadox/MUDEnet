@@ -210,8 +210,9 @@ void message_recieved(ENetEvent* event)
     //verify the UserID first!
     DataStream stream((Byte*)event->packet->data, 2);
     stream.skip_forwards(1);
+    ClientState* client_state = (ClientState*)event->peer->data;
     const char id = *stream.read<char>(); // read the ID given by the user to the server
-    if(((ClientState*)event->peer->data)->ID() != id)
+    if(client_state->ID() != id)
     {
         message_peer(event->peer, "Invalid Client ID, try logging out and in again!");
         return;
@@ -236,6 +237,7 @@ void message_recieved(ENetEvent* event)
     {
         //call the matching mud action with the tokens we've seperated
         found_mud_action->second(event, tokens);
+        command_history.push_back(std::make_pair(client_state->Username(), tokens.front()));
     }
     else
     {
@@ -315,7 +317,7 @@ void mud_say(ENetEvent* event, std::vector<std::string> tokens)
         {
             ss << " " << tokens.at(i);
         }
-
+        std::cout << ss.str() << std::endl;
         for(ClientState* state : client_states)
         {
             if(state->Peer() && client->LocationID() == state->LocationID())
