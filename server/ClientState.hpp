@@ -6,17 +6,20 @@ class ClientState
 {
 private:
 	const std::string m_username;
+	const std::string m_password;
 	const int m_id = -1;
 	int m_locationid = 0;
 	ENetPeer* m_enet_peer = nullptr; // set only when the user is connected
 public:
 	ClientState(){};
-	ClientState(int id, const std::string& username) : m_id(id), m_username(username) {};
+	ClientState(int id, const std::string& username, const std::string& password) 
+	: m_id(id), m_username(username), m_password(password) {};
 
 	void SetENetPeer(ENetPeer* peer) { m_enet_peer = peer; }
 	ENetPeer* Peer() { return m_enet_peer; }
 
-	const std::string& Username() const {return m_username;}
+	const std::string& Username() const { return m_username; }
+	const std::string& Password() const { return m_password; }
 	int ID() const { return m_id; }
 	int LocationID() const {return m_locationid;}
 	void SetLocation(int l) { m_locationid = l;}

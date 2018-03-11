@@ -13,7 +13,7 @@ namespace
 	void save_internal(std::vector<ClientState> states)
 	{
 		json client_save_file;
-	    client_save_file["version"] = 0;
+	    client_save_file["version"] = CLIENT_SAVE_VERSION;
 	    client_save_file["time"] = std::time(nullptr);
 	    json client_array;
 	    for(ClientState& state : states)
@@ -21,6 +21,7 @@ namespace
 	        json client_data;
 	        client_data["id"] = state.ID();
 	        client_data["username"] = state.Username();
+			client_data["password"] = state.Password();
 	        client_data["location"] = state.LocationID();
 	        client_array.push_back(client_data);
 	    }
@@ -75,7 +76,7 @@ bool ClientManager::load_save(const std::string& filename)
 	auto client_array = json_obj["clients"];
 	for(auto client : client_array)
 	{
-		ClientState* new_state = new ClientState(client["id"], client["username"]);
+		ClientState* new_state = new ClientState(client["id"], client["username"], client["password"]);
 		new_state->SetLocation(client["location"]);
 		client_states.push_back(new_state);
 	}
@@ -119,9 +120,9 @@ void ClientManager::save_state()
 	save_thread.detach();
 }
 
-ClientState* ClientManager::register_new_client(ENetEvent* event, std::string username)
+ClientState* ClientManager::register_new_client(ENetEvent* event, std::string username, std::string password)
 {
-	ClientState* new_client = new ClientState(client_states.size(), username);
+	ClientState* new_client = new ClientState(client_states.size(), username, password);
 	event->peer->data = malloc(sizeof(char));
 	*(char*)event->peer->data = (char)new_client->ID();
 	client_states.push_back(new_client);

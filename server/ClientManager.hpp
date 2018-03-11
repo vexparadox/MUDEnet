@@ -3,7 +3,7 @@
 #include <vector>
 #include <string>
 class ClientState;
-#define CLIENT_SAVE_VERSION 0
+#define CLIENT_SAVE_VERSION 1
 class ClientManager
 {
 private:
@@ -19,5 +19,5 @@ public:
 	bool load_save(const std::string&);
 	void save_state();
 	void print_users();
-	ClientState* register_new_client(ENetEvent* event, std::string username);
+	ClientState* register_new_client(ENetEvent* event, std::string username, std::string password);
 };

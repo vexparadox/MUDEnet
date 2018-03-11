@@ -115,6 +115,15 @@ void take_input()
             {
                 client_manager.save_state();
             }
+            else if(strcmp(buffer, "history") == 0)
+            {
+                std::cout << "======= Command History =======" << std::endl;
+                for(std::pair<std::string, std::string>& pair : command_history)
+                {
+                    std::cout << pair.first << " - " << pair.second << std::endl;
+                }
+                std::cout << std::endl;
+            }
             else
             {
                 stream.write(buffer, 510);
@@ -185,19 +194,28 @@ void new_user(ENetEvent* event)
     ClientState* client_ptr = client_manager.client_for_username(event_username);
     if(client_ptr)
     {
-        //need to update the event peer data with the existing client's ID
-        if(event->peer->data == nullptr)
+        if(client_ptr->Password() == md5_password)
         {
-            event->peer->data = malloc(sizeof(char));
+            //need to update the event peer data with the existing client's ID
+            if(event->peer->data == nullptr)
+            {
+                event->peer->data = malloc(sizeof(char));
+            }
+            *(char*)event->peer->data = (char)client_ptr->ID();
+            std::cout << "Returning user with username: " << client_ptr->Username() << std::endl;
         }
-        *(char*)event->peer->data = (char)client_ptr->ID();
-        std::cout << "Returning user with username: " << client_ptr->Username() << std::endl;
+        else
+        {
+            notify_exit();
+            std::cout << "Attempted login to account: " << client_ptr->Username() << std::endl;
+            return;
+        }
     }
     else
     {
         //register a new client
-        client_ptr = client_manager.register_new_client(event, event_username);
-        std::cout << "New user with username: " << client_ptr->Username() << std::endl;
+        client_ptr = client_manager.register_new_client(event, event_username, md5_password);
+        std::cout << "New user with username: " << client_ptr->Username() << " : " << md5_password << std::endl;
     }
 
     //give the client data the event peer data so we can tell their login status
