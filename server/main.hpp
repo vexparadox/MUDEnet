@@ -1,6 +1,7 @@
 #pragma once
 #include "ClientState.hpp"
 #include "WorldState.hpp"
+#include "ClientManager.hpp"
 #include "../shared/DataStream.hpp"
 #include "../shared/md5.hpp"
 #include <memory>
@@ -11,6 +12,7 @@
 #include <enet/enet.h>
 #include <atomic>
 #include <thread>
+
 
 //type def functions 
 typedef void (* Action)(ENetEvent* event);
@@ -26,7 +28,7 @@ void message_recieved(ENetEvent* event);
 void new_user(ENetEvent* event);
 void user_disconnected(ENetEvent* event);
 void send_broadcast(const std::string&);
-void print_users();
+void write_clients_to_file(std::vector<ClientState> states);
 
 std::vector<std::pair<std::string, std::string>> command_history;
 
@@ -38,7 +40,8 @@ Action actions[] = {
 
 //MUD code
 WorldState world_state;
-std::vector<ClientState*> client_states;
+ClientManager client_manager;
+
 std::vector<std::pair<std::string, MUDAction>> mud_actions;
 
 void message_peer(ENetPeer* peer, const std::string& str);
