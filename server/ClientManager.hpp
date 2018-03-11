@@ -3,6 +3,7 @@
 #include <vector>
 #include <string>
 class ClientState;
+#define CLIENT_SAVE_VERSION 0
 class ClientManager
 {
 private:

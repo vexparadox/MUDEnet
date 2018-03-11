@@ -32,6 +32,7 @@ int main(int argc, char const *argv[])
     mud_actions.push_back(std::make_pair("help", mud_help));
 
     world_state.load("map.json");
+    client_manager.load_save("client_data.json");
 
     std::cout << "Server was started on " << argv[1] << ":" << argv[2] << std::endl;
 
@@ -48,7 +49,7 @@ int main(int argc, char const *argv[])
             //When a player connects
             case ENET_EVENT_TYPE_CONNECT:
             {
-                std::cout << std::endl << "A new player connected from " << event.peer->address.host << ":" << event.peer->address.port << std::endl;
+                std::cout << std::endl << "A client connected from " << event.peer->address.host << ":" << event.peer->address.port << std::endl;
                 //send the welcome string
                 message_peer(event.peer, world_state.m_welcome_string);
             }
@@ -162,6 +163,10 @@ void new_user(ENetEvent* event)
     if(client_ptr)
     {
         //need to update the event peer data with the existing client's ID
+        if(event->peer->data == nullptr)
+        {
+            event->peer->data = malloc(sizeof(char));
+        }
         *(char*)event->peer->data = (char)client_ptr->ID();
         std::cout << "Returning user with username: " << client_ptr->Username() << std::endl;
     }

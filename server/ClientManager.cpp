@@ -50,8 +50,37 @@ ClientManager::~ClientManager()
 	client_states.clear();
 }
 
-void ClientManager::load_save(const std::string&)
+void ClientManager::load_save(const std::string& filename)
 {
+	if(client_states.empty() == false)
+	{
+		std::cout << "Trying to load save when there are already clients, this isn't supported!" << std::endl;
+		return;
+	}
+
+	json json_obj;
+	std::ifstream file(filename.c_str());
+	if(file.is_open() == false)
+	{
+		std::cout << "Couldn't find save file of the name " << filename << std::endl;
+		return;
+	}
+	file >> json_obj;
+	
+	int version = json_obj["version"];
+	if(version != CLIENT_SAVE_VERSION)
+	{
+		std::cout << "Loading different version file! Expecting " << CLIENT_SAVE_VERSION << " but got " << version << std::endl;
+	}
+	auto client_array = json_obj["clients"];
+	for(auto client : client_array)
+	{
+		ClientState* new_state = new ClientState(client["id"], client["username"]);
+		new_state->SetLocation(client["location"]);
+		client_states.push_back(new_state);
+	}
+
+	std::cout << "Loaded in " << client_states.size() << " clients" << std::endl;
 	
 }
 
