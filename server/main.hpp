@@ -4,7 +4,6 @@
 #include "ClientManager.hpp"
 #include "ItemManager.hpp"
 #include "../shared/DataStream.hpp"
-#include "../shared/md5.hpp"
 #include <vector>
 #include <ctime>
 #include <stdio.h>

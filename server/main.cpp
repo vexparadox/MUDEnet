@@ -172,12 +172,14 @@ void user_disconnected(ENetEvent* event)
 //We check for a matching client state or create a new one for this user
 void new_user(ENetEvent* event)
 {
-    //prep a stream to send back to the new user with their unique ID
-    DataStream stream(1024);
-    stream.write(Byte(1));
+    DataStream event_stream((Byte*)event->packet->data, 1024);
+    event_stream.skip_forwards(2); // skip the first two bytes
 
+    //TODO this is really hacky.. but it works?
     //get the username out of the event
-    const char* event_username = (char*)event->packet->data+2;
+    const std::string event_username(event_stream.read<char>());
+    event_stream.jump_to(512); //jump to the end of the username
+    const std::string md5_password(event_stream.read<char>()); // read out the password
 
     //check if we already have a user of that name
     ClientState* client_ptr = client_manager.client_for_username(event_username);
@@ -200,6 +202,10 @@ void new_user(ENetEvent* event)
 
     //give the client data the event peer data so we can tell their login status
     client_ptr->SetENetPeer(event->peer);
+
+    //prep a stream to send back to the new user with their unique ID
+    DataStream stream(1024);
+    stream.write(Byte(1));
     //write the client's ID to the stream so they can save it and use it later
     stream.write((char)client_ptr->ID());
 

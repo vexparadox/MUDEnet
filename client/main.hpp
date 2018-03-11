@@ -1,6 +1,7 @@
 #pragma once
 #include <enet/enet.h>
 #include "../shared/DataStream.hpp"
+#include "../shared/md5.hpp"
 #include <stdio.h>
 #include <string.h>
 #include <atomic>
@@ -23,7 +24,7 @@ void disconnect();
 void takeInput();
 void getUsername();
 
-
+//enet methods
 void serverClosed(ENetEvent* event);
 void messageRecieved(ENetEvent* event);
 void uniqueID(ENetEvent* event);

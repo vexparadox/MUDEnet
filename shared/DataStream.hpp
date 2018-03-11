@@ -65,6 +65,17 @@ public:
 		return false;
 	}
 
+	bool jump_to(size_t location)
+	{
+		if(m_head+location <= m_data+m_data_size)
+		{
+			m_head = m_data+location;
+			return true;
+		}
+		std::cout << "Attempt to jump past the end of a data stream" << std::endl;
+		return false;
+	}
+
 	template <typename T>
 	bool read(T& t)
 	{

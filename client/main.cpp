@@ -79,20 +79,33 @@ int main(int argc, char const *argv[])
 
 void getUsername()
 {
-    char buffer[510];
-    memset(buffer, 0, 510);
+    char username_buffer[510];
+    memset(username_buffer, 0, 510);
 	DataStream stream(1024);
     do{
         printf("Username: ");
-        fgets(buffer, 510, stdin);
-    }while(strlen(buffer) <= 1);
+        fgets(username_buffer, 510, stdin);
+    }while(strlen(username_buffer) <= 1);
 
-	stream.write(Byte(1)); // set this to a 1, means a new user
-    char* temp = buffer+strlen(buffer)-1; // remove the \n
+    char* temp = username_buffer+strlen(username_buffer)-1; // remove the \n
     *temp = '\0';
+
+    char password_buffer[510];
+    memset(password_buffer, 0, 510);
+    std::cout << "Please note: passwords are stored and sent as MD5, this is NOT secure! Don't use real passwords!" << std::endl;
+    do{
+        printf("Password: ");
+        fgets(password_buffer, 510, stdin);
+    }while(strlen(password_buffer) <= 1);
+
+    MD5 converter;
+    const std::string md5_password = converter.encode(std::string(password_buffer));
+
     //copy the username to the buffer
-	stream.skip_forwards(1);
-	stream.write(buffer, 510);
+    stream.write(Byte(1)); // set this to a 1, means a new user
+	stream.skip_forwards(1); // we skip the second byte for this command
+	stream.write(username_buffer, 510);
+    stream.write(md5_password);
     ENetPacket* packet = enet_packet_create (stream.data(), stream.size(), ENET_PACKET_FLAG_RELIABLE);
     enet_peer_send (server.load(), 0, packet);         
     enet_host_flush (client.load());
@@ -146,8 +159,7 @@ void serverClosed(ENetEvent*)
 void uniqueID(ENetEvent* event){
     DataStream stream((Byte*)event->packet->data, 1024);
     stream.skip_forwards(1); // jump the first byte
-    stream.read(current_user_id);
-    std::cout << " new user id" << (int)current_user_id << std::endl;
+    stream.read(current_user_id); // save the new user ID for later use
     enet_packet_destroy (event->packet);
 }
 
