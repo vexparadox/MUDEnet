@@ -1,7 +1,6 @@
 #include "main.hpp"
 int main(int argc, char const *argv[])
 {
-    write_clients_to_file(std::vector<ClientState>());
     if (enet_initialize () != 0)
     {
         std::cout << "An error occurred while initializing ENet." << std::endl;
@@ -33,7 +32,6 @@ int main(int argc, char const *argv[])
     mud_actions.push_back(std::make_pair("help", mud_help));
 
     world_state.load("map.json");
-    world_state.parse();
 
     std::cout << "Server was started on " << argv[1] << ":" << argv[2] << std::endl;
 
@@ -411,23 +409,4 @@ void mud_help(ENetEvent* event, std::vector<std::string>)
     ss << "exit";
 
     message_peer(event->peer, ss.str());
-}
-
-void write_clients_to_file(std::vector<ClientState> states)
-{
-    json client_save_file;
-    client_save_file["version"] = 0;
-    client_save_file["time"] = std::time(nullptr);
-    json client_array;
-    for(ClientState& state : states)
-    {
-        json client_data;
-        client_data["id"] = state.ID();
-        client_data["username"] = state.Username();
-        client_data["location"] = state.LocationID();
-        client_array.push_back(client_data);
-    }
-    client_save_file["clients"] = client_array;
-
-    std::cout << client_save_file.dump() << std::endl;
 }

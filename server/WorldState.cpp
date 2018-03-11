@@ -2,15 +2,16 @@
 #include <iostream>
 #include <fstream>
 #include "ClientState.hpp"
+#include "../shared/json.hpp"
+
+using json = nlohmann::json;
 
 void WorldState::load(const std::string& filename)
 {
+	json json_obj;
 	std::ifstream i(filename.c_str());
 	i >> json_obj;
-}
-
-void WorldState::parse()
-{
+	
 	m_world_height = json_obj["height"];
 	m_world_width = json_obj["width"];
 	m_welcome_string = json_obj["welcome_text"];
@@ -24,6 +25,7 @@ void WorldState::parse()
 		}
 		m_locations.emplace_back(Location(world["id"], world["title"], world["description"], world["here"], world["n"], world["e"], world["s"], world["w"], std::move(required_items), world["passable"]));
 	}
+
 }
 
 bool Location::IsPassable(ClientState* client_state) const

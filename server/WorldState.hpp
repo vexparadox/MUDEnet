@@ -1,8 +1,6 @@
 #pragma once
-#include "../shared/json.hpp"
-
-using json = nlohmann::json;
-
+#include <string>
+#include <vector>
 class ClientState;
 
 struct Location
@@ -33,7 +31,5 @@ public:
 	int m_world_width;
 
 	const std::vector<Location>& Locations() { return m_locations; };
-	json json_obj;
 	void load(const std::string& filename);
-	void parse();
 };

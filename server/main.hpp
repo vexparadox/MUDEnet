@@ -12,7 +12,9 @@
 #include <enet/enet.h>
 #include <atomic>
 #include <thread>
-
+#include <string>
+#include <sstream>
+#include <algorithm>
 
 //type def functions 
 typedef void (* Action)(ENetEvent* event);
@@ -28,7 +30,6 @@ void message_recieved(ENetEvent* event);
 void new_user(ENetEvent* event);
 void user_disconnected(ENetEvent* event);
 void send_broadcast(const std::string&);
-void write_clients_to_file(std::vector<ClientState> states);
 
 std::vector<std::pair<std::string, std::string>> command_history;
 
