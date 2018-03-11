@@ -26,13 +26,18 @@ namespace
 	    }
 	    client_save_file["clients"] = client_array;
 
-	    std::string filename("client_data");
-	    filename.append(std::to_string(std::time(nullptr)));
-	    filename.append(".json");
+	    std::string filename("client_data.json");
 	    std::ofstream file(filename);
-	    file << client_save_file;
-	    file.close();
-	    std::cout << "Client data saved!" << std::endl;
+	    if(file.is_open())
+	    {
+	    	file << client_save_file;
+	    	file.close();
+	    	std::cout << "Client data saved!" << std::endl;
+	    }
+	    else
+	    {
+	    	std::cout << "Client data file failed to open!" << std::endl;
+	    }
 	}
 }
 
