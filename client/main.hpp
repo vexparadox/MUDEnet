@@ -22,11 +22,15 @@ std::atomic<bool> running; // the running boolean
 void disconnect();
 void takeInput();
 void getUsername();
+
+
+void serverClosed(ENetEvent* event);
 void messageRecieved(ENetEvent* event);
 void uniqueID(ENetEvent* event);
 
 //a list of actions
 Action actions[] = {
 	messageRecieved,
-	uniqueID
+	uniqueID,
+	serverClosed
 };

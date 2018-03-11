@@ -31,6 +31,7 @@ void message_recieved(ENetEvent* event);
 void new_user(ENetEvent* event);
 void user_disconnected(ENetEvent* event);
 void send_broadcast(const std::string&);
+void notify_exit();
 
 //the last time the game saved
 unsigned long last_save_time = 0;

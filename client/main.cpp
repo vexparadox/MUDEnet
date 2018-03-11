@@ -136,6 +136,12 @@ void messageRecieved(ENetEvent* event){
     enet_packet_destroy (event->packet);
 }
 
+void serverClosed(ENetEvent*)
+{
+    std::cout << "Server has shutdown! Closing client..." << std::endl;
+    std::exit(0);
+}
+
 //occurs when new clients connect to the server
 void uniqueID(ENetEvent* event){
     DataStream stream((Byte*)event->packet->data, 1024);

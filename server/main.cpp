@@ -6,7 +6,6 @@ int main(int argc, char const *argv[])
         std::cout << "An error occurred while initializing ENet." << std::endl;
         return 1;
     }
-    atexit (enet_deinitialize);
 
     if(argc < 3)
     {
@@ -29,8 +28,8 @@ int main(int argc, char const *argv[])
     }
     client_manager.load_save("client_data.json");
 
-
-    run.store(true);
+    //deinit enet
+    atexit (enet_deinitialize);
 
     //make the pairs of mud functions
     mud_actions.push_back(std::make_pair("look", mud_look));
@@ -43,8 +42,10 @@ int main(int argc, char const *argv[])
     //start input thread
     std::thread inputThread(&take_input);
 
+    //last save time as now
     last_save_time = std::time(nullptr);
 
+    run.store(true);
     while(run.load()){
         ENetEvent event;
         //wait upto 15ms for an event
@@ -80,7 +81,7 @@ int main(int argc, char const *argv[])
             last_save_time = std::time(nullptr);
         }
     }
-
+    notify_exit();
     enet_host_destroy(host);
     inputThread.join();
 	return 0;
@@ -127,6 +128,15 @@ void take_input()
         }
 
     }
+}
+
+void notify_exit()
+{
+    DataStream broadcast_stream(1024);
+    broadcast_stream.write(Byte(2));
+    ENetPacket* packet = enet_packet_create (broadcast_stream.data(), broadcast_stream.size(), ENET_PACKET_FLAG_RELIABLE);
+    enet_host_broadcast (host.load(), 0, packet);
+    enet_host_flush (host.load());
 }
 
 //broadcast to all players in the server
