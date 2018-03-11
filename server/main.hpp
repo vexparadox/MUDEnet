@@ -2,10 +2,11 @@
 #include "ClientState.hpp"
 #include "WorldState.hpp"
 #include "ClientManager.hpp"
+#include "ItemManager.hpp"
 #include "../shared/DataStream.hpp"
 #include "../shared/md5.hpp"
-#include <memory>
 #include <vector>
+#include <ctime>
 #include <stdio.h>
 #include <iostream>
 #include <cstring>
@@ -30,6 +31,10 @@ void message_recieved(ENetEvent* event);
 void new_user(ENetEvent* event);
 void user_disconnected(ENetEvent* event);
 void send_broadcast(const std::string&);
+
+//the last time the game saved
+unsigned long last_save_time = 0;
+int save_interval_seconds = 60;
 
 std::vector<std::pair<std::string, std::string>> command_history;
 

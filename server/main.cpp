@@ -43,10 +43,12 @@ int main(int argc, char const *argv[])
     //start input thread
     std::thread inputThread(&take_input);
 
+    last_save_time = std::time(nullptr);
+
     while(run.load()){
         ENetEvent event;
-        //wait upto half a second for an event
-        while (enet_host_service (host.load(), &event, 0) > 0)
+        //wait upto 15ms for an event
+        while (enet_host_service (host.load(), &event, 15) > 0)
         {
             switch (event.type)
             {
@@ -71,7 +73,12 @@ int main(int argc, char const *argv[])
                 break;
             }
         }
-
+        //save every 60 seconds
+        if(std::time(nullptr)-last_save_time > save_interval_seconds)
+        {
+            client_manager.save_state();
+            last_save_time = std::time(nullptr);
+        }
     }
 
     enet_host_destroy(host);
