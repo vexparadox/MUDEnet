@@ -6,17 +6,15 @@ This is a MUD built using Enet in C++!
 
 * Create a build script for Windows
 
-* Write out the client states upon exit
-
 * Write out world state upon exit? (currently nothing in the world state is actually modified)
 
 * Add in pickupable/awardable items
 
+* Add in quests users can pickup
+
 * Add movement that requires items (machette for forest eg)
 
-* Add in MUD say command
-
-* Improve the DataStream and use in the neglected Client code for clarity
+* Improve the DataStream to handle more types
 
 ## Requirements & Setup
 Run the "make_all.sh" script to install enet and build the binaries :)
