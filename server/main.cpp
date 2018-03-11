@@ -165,14 +165,17 @@ void user_disconnected(ENetEvent* event)
 {
     //clear the client's enet peer, this is so we know they're logged in
     ClientState* client_state = client_manager.client_for_id(event->peer->data);
-    client_state->SetENetPeer(nullptr);
+    if(client_state)
+    {
+        client_state->SetENetPeer(nullptr);
 
-    std::string disconected_string = client_state->Username();
-    disconected_string.append(" disconected.");
-    send_broadcast(disconected_string);
-
+        std::string disconected_string = client_state->Username();
+        disconected_string.append(" disconected.");
+        send_broadcast(disconected_string);
+        std::cout << client_state->Username() << " disconected." << std::endl;
+    }
+    delete (char*)event->peer->data;
     event->peer->data = nullptr;
-    std::cout << client_state->Username() << " disconected." << std::endl;
 }
 
 
