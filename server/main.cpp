@@ -228,7 +228,8 @@ void message_recieved(ENetEvent* event)
     DataStream stream((Byte*)event->packet->data, 2);
     stream.skip_forwards(1);
     ClientState* client_state = client_manager.client_for_id(event->peer->data);
-    const char id = *stream.read<char>(); // read the ID given by the user to the server
+    char id;
+    stream.read(id); // read the id out of the stream
     if(client_state->ID() != id)
     {
         message_peer(event->peer, "Invalid Client ID, try logging out and in again!");
