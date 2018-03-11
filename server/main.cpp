@@ -22,17 +22,21 @@ int main(int argc, char const *argv[])
         std::cout << "An error occurred while trying to create the server host." << std::endl;
         return 1;
     }
-    run.store(true);
 
+    if(world_state.load("map.json") == false)
+    {
+        return 1;
+    }
+    client_manager.load_save("client_data.json");
+
+
+    run.store(true);
 
     //make the pairs of mud functions
     mud_actions.push_back(std::make_pair("look", mud_look));
     mud_actions.push_back(std::make_pair("say", mud_say));
     mud_actions.push_back(std::make_pair("go", mud_go));
     mud_actions.push_back(std::make_pair("help", mud_help));
-
-    world_state.load("map.json");
-    client_manager.load_save("client_data.json");
 
     std::cout << "Server was started on " << argv[1] << ":" << argv[2] << std::endl;
 

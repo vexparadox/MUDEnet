@@ -31,5 +31,5 @@ public:
 	int m_world_width;
 
 	const std::vector<Location>& Locations() { return m_locations; };
-	void load(const std::string& filename);
+	bool load(const std::string& filename);
 };

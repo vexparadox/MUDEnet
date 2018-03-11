@@ -50,12 +50,12 @@ ClientManager::~ClientManager()
 	client_states.clear();
 }
 
-void ClientManager::load_save(const std::string& filename)
+bool ClientManager::load_save(const std::string& filename)
 {
 	if(client_states.empty() == false)
 	{
 		std::cout << "Trying to load save when there are already clients, this isn't supported!" << std::endl;
-		return;
+		return false;
 	}
 
 	json json_obj;
@@ -63,7 +63,7 @@ void ClientManager::load_save(const std::string& filename)
 	if(file.is_open() == false)
 	{
 		std::cout << "Couldn't find save file of the name " << filename << std::endl;
-		return;
+		return false;
 	}
 	file >> json_obj;
 	
@@ -81,7 +81,7 @@ void ClientManager::load_save(const std::string& filename)
 	}
 
 	std::cout << "Loaded in " << client_states.size() << " clients" << std::endl;
-	
+	return true;
 }
 
 void ClientManager::print_users()

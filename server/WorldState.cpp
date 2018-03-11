@@ -6,11 +6,16 @@
 
 using json = nlohmann::json;
 
-void WorldState::load(const std::string& filename)
+bool WorldState::load(const std::string& filename)
 {
 	json json_obj;
-	std::ifstream i(filename.c_str());
-	i >> json_obj;
+	std::ifstream file(filename.c_str());
+	if(file.is_open() == false)
+	{
+		std::cout << "Failed to find world file!" << std::endl;
+		return false;
+	}
+	file >> json_obj;
 	
 	m_world_height = json_obj["height"];
 	m_world_width = json_obj["width"];
@@ -25,7 +30,7 @@ void WorldState::load(const std::string& filename)
 		}
 		m_locations.emplace_back(Location(world["id"], world["title"], world["description"], world["here"], world["n"], world["e"], world["s"], world["w"], std::move(required_items), world["passable"]));
 	}
-
+	return true;
 }
 
 bool Location::IsPassable(ClientState* client_state) const

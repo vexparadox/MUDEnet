@@ -16,7 +16,7 @@ public:
 	ClientState* client_for_id(char);
 	std::vector<ClientState*> online_users();
 
-	void load_save(const std::string&);
+	bool load_save(const std::string&);
 	void save_state();
 	void print_users();
 	ClientState* register_new_client(ENetEvent* event, std::string username);
