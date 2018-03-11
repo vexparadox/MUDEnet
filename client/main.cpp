@@ -109,6 +109,7 @@ void getUsername()
     ENetPacket* packet = enet_packet_create (stream.data(), stream.size(), ENET_PACKET_FLAG_RELIABLE);
     enet_peer_send (server.load(), 0, packet);         
     enet_host_flush (client.load());
+    std::cout << std::endl;
 }
 
 void takeInput()
@@ -149,9 +150,17 @@ void messageRecieved(ENetEvent* event){
     enet_packet_destroy (event->packet);
 }
 
-void serverClosed(ENetEvent*)
+void badLogin(ENetEvent* event)
+{
+    std::cout << "Bad password/username already taken! Closing client.." << std::endl; 
+    enet_packet_destroy (event->packet);
+    std::exit(0);
+}
+
+void serverClosed(ENetEvent* event)
 {
     std::cout << "Server has shutdown! Closing client..." << std::endl;
+    enet_packet_destroy (event->packet);
     std::exit(0);
 }
 
@@ -161,6 +170,7 @@ void uniqueID(ENetEvent* event){
     stream.skip_forwards(1); // jump the first byte
     stream.read(current_user_id); // save the new user ID for later use
     enet_packet_destroy (event->packet);
+    std::cout << "Login succeeded." << std::endl;
 }
 
 void disconnect(){

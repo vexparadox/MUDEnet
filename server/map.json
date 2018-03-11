@@ -1,5 +1,5 @@
 {
-	"welcome_text" : "Welcome to AnvilHack4, use 'help' to see what you can do.",
+	"welcome_text" : "Welcome to the MUD! Use the `help` command to see what you can do.",
 	"width": 3,
 	"height": 2,
 	"worldmap":[

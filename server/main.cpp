@@ -141,7 +141,7 @@ void take_input()
 
 void notify_exit()
 {
-    DataStream broadcast_stream(1024);
+    DataStream broadcast_stream(1);
     broadcast_stream.write(Byte(2));
     ENetPacket* packet = enet_packet_create (broadcast_stream.data(), broadcast_stream.size(), ENET_PACKET_FLAG_RELIABLE);
     enet_host_broadcast (host.load(), 0, packet);
@@ -173,7 +173,6 @@ void user_disconnected(ENetEvent* event)
 
     event->peer->data = nullptr;
     std::cout << client_state->Username() << " disconected." << std::endl;
-
 }
 
 
@@ -196,18 +195,27 @@ void new_user(ENetEvent* event)
     {
         if(client_ptr->Password() == md5_password)
         {
-            //need to update the event peer data with the existing client's ID
+            //we malloc the peer data when we register new clients
+            //but if the server has restarted and we're using existing loaded client data
+            //we can have existing users with non malloc'd peer data
             if(event->peer->data == nullptr)
             {
                 event->peer->data = malloc(sizeof(char));
             }
+            //write the client ID to their packet
             *(char*)event->peer->data = (char)client_ptr->ID();
             std::cout << "Returning user with username: " << client_ptr->Username() << std::endl;
         }
         else
         {
-            notify_exit();
+            DataStream bad_password_stream(1);
+            bad_password_stream.write(Byte(3)); // bad login
+            ENetPacket* packet = enet_packet_create (bad_password_stream.data(), bad_password_stream.size(), ENET_PACKET_FLAG_RELIABLE);
+            enet_peer_send (event->peer, 0, packet);
+            enet_host_flush (host.load());
+
             std::cout << "Attempted login to account: " << client_ptr->Username() << std::endl;
+            enet_packet_destroy(event->packet);
             return;
         }
     }
@@ -215,6 +223,7 @@ void new_user(ENetEvent* event)
     {
         //register a new client
         client_ptr = client_manager.register_new_client(event, event_username, md5_password);
+
         std::cout << "New user with username: " << client_ptr->Username() << " : " << md5_password << std::endl;
     }
 
