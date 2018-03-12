@@ -16,6 +16,10 @@ This is a MUD built using Enet in C++!
 
 * Improve the DataStream to handle more types
 
+## Servers!
+
+There's a constant up to date server running on `178.62.94.185` on port `1234`, you can run this with the client built below. 
+
 ## Requirements & Setup
 Run the "make_all.sh" script to install enet and build the binaries :)
 
