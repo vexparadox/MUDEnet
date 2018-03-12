@@ -16,6 +16,8 @@
 #include <sstream>
 #include <algorithm>
 
+#define CLIENT_VERSION_REQUIRED 0
+
 //type def functions 
 typedef void (* Action)(ENetEvent* event);
 typedef void (* MUDAction)(ENetEvent* event, std::vector<std::string>); 

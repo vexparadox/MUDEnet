@@ -7,6 +7,8 @@
 #include <atomic>
 #include <thread>
 
+#define CLIENT_VERSION 1
+
 //type def functions 
 typedef void (* Action)(ENetEvent* event);
 
@@ -29,11 +31,13 @@ void serverClosed(ENetEvent* event);
 void messageRecieved(ENetEvent* event);
 void uniqueID(ENetEvent* event);
 void badLogin(ENetEvent* event);
+void badClient(ENetEvent* event);
 
 //a list of actions
 Action actions[] = {
 	messageRecieved,
 	uniqueID,
 	serverClosed,
-	badLogin
+	badLogin,
+	badClient
 };

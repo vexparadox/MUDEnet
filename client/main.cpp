@@ -103,7 +103,7 @@ void getUsername()
 
     //copy the username to the buffer
     stream.write(Byte(1)); // set this to a 1, means a new user
-	stream.skip_forwards(1); // we skip the second byte for this command
+	stream.write(Byte(CLIENT_VERSION)); // Write the client version
 	stream.write(username_buffer, 510);
     stream.write(md5_password);
     ENetPacket* packet = enet_packet_create (stream.data(), stream.size(), ENET_PACKET_FLAG_RELIABLE);
@@ -153,6 +153,13 @@ void messageRecieved(ENetEvent* event){
 void badLogin(ENetEvent* event)
 {
     std::cout << "Bad password/username already taken! Closing client.." << std::endl; 
+    enet_packet_destroy (event->packet);
+    std::exit(0);
+}
+
+void badClient(ENetEvent* event)
+{
+    std::cout << "You have an outdated client! Closing client.." << std::endl; 
     enet_packet_destroy (event->packet);
     std::exit(0);
 }

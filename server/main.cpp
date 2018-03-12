@@ -182,7 +182,24 @@ void user_disconnected(ENetEvent* event)
 void new_user(ENetEvent* event)
 {
     DataStream event_stream((Byte*)event->packet->data, 1024);
-    event_stream.skip_forwards(2); // skip the first two bytes
+    event_stream.skip_forwards(1); // skip the first byte
+    
+    //get the client version
+    Byte client_version;
+    event_stream.read(client_version);
+
+    if(client_version != CLIENT_VERSION_REQUIRED)
+    {
+        DataStream bad_client_version_stream(1);
+        bad_client_version_stream.write(Byte(4)); // bad client version
+        ENetPacket* packet = enet_packet_create (bad_client_version_stream.data(), bad_client_version_stream.size(), ENET_PACKET_FLAG_RELIABLE);
+        enet_peer_send (event->peer, 0, packet);
+        enet_host_flush (host.load());
+
+        std::cout << "Incorrect client tried to connect." << std::endl;
+        enet_packet_destroy(event->packet);
+        return;
+    }
 
     //TODO this is really hacky.. but it works?
     //get the username out of the event
