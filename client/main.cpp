@@ -79,6 +79,7 @@ int main(int argc, char const *argv[])
 
 void getUsername()
 {
+    std::cout << "Giving a new username will create a new account, using an existing one with the correct password will log you back in." << std::endl; 
     char username_buffer[510];
     memset(username_buffer, 0, 510);
 	DataStream stream(1024);
@@ -92,7 +93,7 @@ void getUsername()
 
     char password_buffer[510];
     memset(password_buffer, 0, 510);
-    std::cout << "Please note: passwords are stored and sent as MD5, this is NOT secure! Don't use real passwords!" << std::endl;
+    std::cout << "Please note: passwords are stored and sent as MD5, this is NOT secure! They are not human readable but please don't use real passwords!" << std::endl;
     do{
         printf("Password: ");
         fgets(password_buffer, 510, stdin);

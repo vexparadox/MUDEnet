@@ -7,7 +7,7 @@
 #include <atomic>
 #include <thread>
 
-#define CLIENT_VERSION 1
+#define CLIENT_VERSION 0
 
 //type def functions 
 typedef void (* Action)(ENetEvent* event);
