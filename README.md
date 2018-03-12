@@ -44,4 +44,4 @@ Note that B2 is used for UserIDs, the Client doesn't need to know about its own 
 |   Name  | B1 |  B2  | B3 to B1024      |                         Notes                        |
 |:-------:|:--:|:----:|-----------------|:----------------------------------------------------:|
 | Message |  0 | NULL | Message Content | Used to send commands to the server |
-| Username |  1 | NULL | Username | B3-B510 used as a login and retrieve the existing/new client state. A unique ID will be returned to this user only!|
+| Username |  1 | NULL | Username | B3-B512 used as a login and retrieve the existing/new client state. B512-B1024 is a MD5 hashed password.|
