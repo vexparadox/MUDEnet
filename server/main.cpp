@@ -57,8 +57,6 @@ int main(int argc, char const *argv[])
             case ENET_EVENT_TYPE_CONNECT:
             {
                 std::cout << std::endl << "A client connected from " << event.peer->address.host << ":" << event.peer->address.port << std::endl;
-                //send the welcome string
-                message_peer(event.peer, world_state.m_welcome_string);
             }
             break;
             case ENET_EVENT_TYPE_RECEIVE:
@@ -241,9 +239,11 @@ void new_user(ENetEvent* event)
 
     //tell the new user about their UniqueID
     ENetPacket* packet = enet_packet_create (stream.data(), stream.size(), ENET_PACKET_FLAG_RELIABLE);
-    enet_peer_send (event->peer, 0, packet);
+    enet_peer_send (client_ptr->Peer(), 0, packet);
     enet_host_flush (host.load());
 
+    //send welcome string
+    message_peer(client_ptr->Peer(), world_state.m_welcome_string);
     //send the user the information for where they currently are
     mud_look(event, std::vector<std::string>());
 
