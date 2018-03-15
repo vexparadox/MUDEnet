@@ -2,6 +2,7 @@
 #include <enet/enet.h>
 #include <vector>
 #include <string>
+
 class ClientState;
 #define CLIENT_SAVE_VERSION 1
 class ClientManager

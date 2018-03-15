@@ -3,7 +3,6 @@
 #include <iostream>
 #include <thread>
 #include <fstream>
-#include "../shared/json.hpp"
 #include <ctime>
 
 using json = nlohmann::json;
@@ -19,10 +18,9 @@ namespace
 	    for(ClientState& state : states)
 	    {
 	        json client_data;
-	        client_data["id"] = state.ID();
-	        client_data["username"] = state.Username();
-			client_data["password"] = state.Password();
-	        client_data["location"] = state.LocationID();
+
+	        state.save(client_data);
+
 	        client_array.push_back(client_data);
 	    }
 	    client_save_file["clients"] = client_array;
