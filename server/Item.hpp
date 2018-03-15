@@ -18,4 +18,6 @@ public:
 	: m_id(id), m_name(name), m_description(description), m_attributes(attributes){};
 
 	int ID() const { return m_id; }
+	const std::string& Name() const { return m_name; }
+	const std::string& Description() const { return m_description; }
 };

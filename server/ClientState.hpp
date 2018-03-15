@@ -22,9 +22,9 @@ public:
 
 	void SetENetPeer(ENetPeer* peer) { m_enet_peer = peer; }
 	ENetPeer* Peer() { return m_enet_peer; }
-
 	void save(json&) const;
 
+	const Inventory& inventory() const { return m_inventory; }
 	const std::string& Username() const { return m_username; }
 	const std::string& Password() const { return m_password; }
 	int ID() const { return m_id; }

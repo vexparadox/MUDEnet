@@ -36,6 +36,7 @@ int main(int argc, char const *argv[])
     mud_actions.push_back(std::make_pair("say", mud_say));
     mud_actions.push_back(std::make_pair("go", mud_go));
     mud_actions.push_back(std::make_pair("help", mud_help));
+    mud_actions.push_back(std::make_pair("inv", mud_inv));
 
     std::cout << "Server was started on " << argv[1] << ":" << argv[2] << std::endl;
 
@@ -489,4 +490,13 @@ void mud_help(ENetEvent* event, std::vector<std::string>)
     ss << "exit";
 
     message_peer(event->peer, ss.str());
+}
+
+void mud_inv(ENetEvent* event, std::vector<std::string>)
+{
+    ClientState* client = client_manager.client_for_id(event->peer->data);
+    if(client)
+    {
+        message_peer(event->peer, client->inventory().print_string(item_manager));
+    }
 }

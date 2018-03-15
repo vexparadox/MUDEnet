@@ -58,4 +58,4 @@ void mud_look(ENetEvent* event, std::vector<std::string>);
 void mud_say(ENetEvent* event, std::vector<std::string>);
 void mud_go(ENetEvent* event, std::vector<std::string>);
 void mud_help(ENetEvent* event, std::vector<std::string>);
-
+void mud_inv(ENetEvent* event, std::vector<std::string>);
