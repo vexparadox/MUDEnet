@@ -41,7 +41,7 @@
 		},
 		{
 			"id": 3,
-			"title": "Farghen Forest",
+			"title": "Gwynhaven - West Town Square",
 			"description": "A dense forest, older than the town of Gwynhaven.",
 			"here": "The ground moves as you walk over it, the air is thick with life." ,
 			"n": "To the north you can see the town of Gwynhaven, the feeling of home gives you warmth.",
@@ -49,11 +49,11 @@
 			"s": "The south is impassable, once again the black has caught up to you.",
 			"w": "Turning to the west you see the face of the void, it stares back.",
 			"requireditems": ["cut"],
-			"passable": false
+			"passable": true
 		},
 		{
 			"id": 4,
-			"title": "Farghen Forest Outskirts",
+			"title": "Gwynhaven - Town Square",
 			"description": "The outskirts of the Fargen Forest.",
 			"here": "This place feels safe. There's a message board on the side of a hut, it has messages left by other travellers.\nTaking a closer look there's also some job postings." ,
 			"n": "Over the hill to the north you see the Forest Path, you're annoyed at how easy it was to walk.",
@@ -61,17 +61,17 @@
 			"s": "The south sees the world fall away into black, you turn away.",
 			"w": "Turning to the west you see the forest continue.",
 			"requireditems": ["cut"],
-			"passable": false
+			"passable": true
 		},
 		{
 			"id": 5,
-			"title": "Crattelish Forest Path",
-			"description": "A small winding path through the dense forest.",
-			"here": "Guards are dotted around the tree line, they seem indifferent to the rustling behind them." ,
-			"n": "To the north you see smoke rising about the Crattelish Outpost.",
-			"e": "The east gives you a sense of dread, past the trees you see the dark.",
-			"s": "Looking to the south you see COMING SOON LOL.",
-			"w": "The west is walled by an indescribably thick forest, you'll need tools to get through there.",
+			"title": "BUILDINGS! IMPASSABLE",
+			"description": "",
+			"here": "" ,
+			"n": "",
+			"e": "",
+			"s": "",
+			"w": "",
 			"requireditems": [],
 			"passable": false
 		}
