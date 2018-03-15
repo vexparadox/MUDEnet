@@ -46,9 +46,10 @@ Action actions[] = {
 	new_user
 };
 
-//MUD code
+//managers
 WorldState world_state;
 ClientManager client_manager;
+ItemManager item_manager;
 
 std::vector<std::pair<std::string, MUDAction>> mud_actions;
 

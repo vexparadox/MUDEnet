@@ -3,7 +3,7 @@
 #include <vector>
 enum class ITEM_ATTRIBUTE : int
 {
-	CUT,
+	WEAPON,
 	NUM
 };
 

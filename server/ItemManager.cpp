@@ -50,7 +50,7 @@ Item* ItemManager::item_for_id(int id) const
 ITEM_ATTRIBUTE item_attribute_from_string(const std::string& str)
 {
 	static const std::unordered_map<std::string, ITEM_ATTRIBUTE> attributes =
-	{{ "cut", ITEM_ATTRIBUTE::CUT}};
+	{{ "weapon", ITEM_ATTRIBUTE::WEAPON}};
 
 	auto found_attribute = attributes.find(str);
 	if(found_attribute != attributes.end())
