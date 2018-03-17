@@ -19,6 +19,7 @@ struct Location
 	std::string m_west;
 	std::vector<std::string> m_required_items;
 	std::vector<int> m_available_quests;
+	std::vector<int> m_available_items;
 	bool m_passable;
 	Location(json&);
 

@@ -14,7 +14,8 @@
 			"w": "To the west, the town walls tower over you. They're simple but effective.",
 			"requireditems": [],
 			"passable": true,
-			"quests" : []
+			"quests" : [],
+			"items" : []
 		},
 		{
 			"id": 1,
@@ -27,7 +28,8 @@
 			"w": "To the west is the back gate of Gwynhaven. You think back to when you first caught glimpse of the wooden barricades through the trees.",
 			"requireditems": [], 
 			"passable": true,
-			"quests" : []
+			"quests" : [],
+			"items" : []
 		},
 		{
 			"id": 2,
@@ -40,7 +42,8 @@
 			"w": "Turning to the west there's the north side of the town centre.",
 			"requireditems": [],
 			"passable": true,
-			"quests" : []
+			"quests" : [],
+			"items" : []
 		},
 		{
 			"id": 3,
@@ -53,7 +56,8 @@
 			"w": "Turning to the west you see the face of the void, it stares back.",
 			"requireditems": ["cut"],
 			"passable": true,
-			"quests" : []
+			"quests" : [],
+			"items" : []
 		},
 		{
 			"id": 4,
@@ -66,7 +70,8 @@
 			"w": "Turning to the west you see the forest continue.",
 			"requireditems": ["cut"],
 			"passable": true,
-			"quests" : []
+			"quests" : [],
+			"items" : []
 		},
 		{
 			"id": 5,
@@ -79,7 +84,8 @@
 			"w": "",
 			"requireditems": [],
 			"passable": false,
-			"quests" : []
+			"quests" : [],
+			"items" : []
 		}
 	]
 }

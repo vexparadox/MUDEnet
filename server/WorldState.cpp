@@ -18,6 +18,11 @@ Location::Location(json& location_obj)
 	{
 		m_available_quests.push_back(quest);
 	}
+
+	for(auto item : location_obj["items"])
+	{
+		m_available_items.push_back(item);
+	}
 }
 
 bool Location::IsPassable(ClientState* client_state) const
