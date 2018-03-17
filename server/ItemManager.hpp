@@ -13,5 +13,3 @@ public:
 	
 	Item* item_for_id(int id) const;
 };
-
-ITEM_ATTRIBUTE item_attribute_from_string(const std::string&);
