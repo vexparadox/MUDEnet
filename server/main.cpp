@@ -22,7 +22,9 @@ int main(int argc, char const *argv[])
         return 1;
     }
 
-    if(world_state.load("map.json") == false || item_manager.load("items.json") == false)
+    if(item_manager.load("items.json") == false || 
+        quest_manager.load("quests.json") == false || 
+        world_state.load("map.json") == false )
     {
         return 1;
     }

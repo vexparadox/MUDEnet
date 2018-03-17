@@ -1,0 +1,12 @@
+{
+	"quests" :
+	[
+		{
+			"id": 0,
+			"title": "Test",
+			"description": "A test quest!",
+			"item_rewards": [0],
+			"cash_reward": 20
+		}
+	]
+}

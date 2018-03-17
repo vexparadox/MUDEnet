@@ -3,6 +3,7 @@
 #include "WorldState.hpp"
 #include "ClientManager.hpp"
 #include "ItemManager.hpp"
+#include "QuestManager.hpp"
 #include "../shared/DataStream.hpp"
 #include <vector>
 #include <ctime>
@@ -54,6 +55,7 @@ Action actions[] = {
 WorldState world_state;
 ClientManager client_manager;
 ItemManager item_manager;
+QuestManager quest_manager;
 
 std::vector<std::pair<std::string, MUDAction>> mud_actions;
 

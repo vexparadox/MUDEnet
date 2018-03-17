@@ -1,6 +1,8 @@
 #include "Inventory.hpp"
 #include "ItemManager.hpp"
 #include <sstream>
+#include <iostream>
+
 void Inventory::save(json& inv_obj) const
 {
 	inv_obj["cash"] = cash();
@@ -28,6 +30,10 @@ std::string Inventory::print_string(const ItemManager& item_manager) const
 		if(item)
 		{
 			ss << item->name() << " - " << item->description() << "\n";
+		}
+		else
+		{
+			std::cout << "Incorrect item found in inventory of ID " << item_id << std::endl;
 		}
 	}
 	return ss.str();

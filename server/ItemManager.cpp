@@ -5,6 +5,16 @@
 
 using json = nlohmann::json;
 
+ItemManager::~ItemManager()
+{
+	m_item_map.clear();
+	for(Item* item : m_items)
+	{
+		delete item;
+	}
+	m_items.clear();
+}
+
 bool ItemManager::load(const std::string& filename)
 {
 	json json_obj;
@@ -33,6 +43,7 @@ bool ItemManager::load(const std::string& filename)
 		m_items.push_back(new_item);
 		m_item_map[new_item->ID()] = new_item;
 	}
+	std::cout << "Item file loaded correctly: " << filename << std::endl;
 	return true;
 }
 

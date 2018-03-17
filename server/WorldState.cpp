@@ -30,6 +30,7 @@ bool WorldState::load(const std::string& filename)
 		}
 		m_locations.emplace_back(Location(world["id"], world["title"], world["description"], world["here"], world["n"], world["e"], world["s"], world["w"], std::move(required_items), world["passable"]));
 	}
+	std::cout << "World loaded correctly: " << filename << std::endl;
 	return true;
 }
 

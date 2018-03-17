@@ -78,7 +78,7 @@ bool ClientManager::load_save(const std::string& filename)
 		client_states.push_back(new_state);
 	}
 
-	std::cout << "Loaded in " << client_states.size() << " clients" << std::endl;
+	std::cout << "Client manager loaded " << client_states.size() << " clients: " << filename << std::endl;
 	return true;
 }
 
