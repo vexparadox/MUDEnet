@@ -23,6 +23,7 @@ struct Location
 	bool m_passable;
 	Location(json&);
 	std::vector<int> available_quests(ClientState*) const;
+	bool is_quest_available(ClientState*, int quest_id) const;
 	bool IsPassable(ClientState*) const;
 };
 

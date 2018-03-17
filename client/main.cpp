@@ -147,7 +147,7 @@ void takeInput()
 void messageRecieved(ENetEvent* event){
     //print the packet
 	DataStream stream(event->packet->data, 1024);
-    printf ("%s\n\n", stream.data()+2);
+    printf ("%s\n", stream.data()+2);
     enet_packet_destroy (event->packet);
 }
 

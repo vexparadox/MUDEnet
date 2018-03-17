@@ -18,6 +18,8 @@ public:
 	int ID() const {return m_id;}
 	const std::string& title() const { return m_title; }
 	const std::string& description() const { return m_description; }
+	const std::string& complete_string() const {return m_complete_string;}
+	const std::string& accept_string() const { return m_accept_string; }
 	std::string quest_string(bool show_rewards) const;
 	int cash_reward() const { return m_cash_reward; }
 };

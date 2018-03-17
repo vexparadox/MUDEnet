@@ -365,6 +365,7 @@ void mud_look(ENetEvent* event, std::vector<std::string> tokens)
             ss << client_loc.m_here;
         }
     }
+    ss << "\n";
     message_peer(event->peer, ss.str());
 }
 
@@ -515,18 +516,26 @@ void mud_quests(ENetEvent* event, std::vector<std::string> tokens)
     ClientState* client = client_manager.client_for_id(event->peer->data);
     if(client)
     {
+        //get the client's location
+        const Location& client_loc = world_state.location(client->location_id());
         std::stringstream ss;
+
+        //if we're listing quests
         if(tokens.at(1) == "list")
         {
+            //get the client's active quests
             ss << client->quest_status_string(quest_manager, false);
             ss << "---- Available Quests ----\n";
-            if(world_state.location(client->location_id()).available_quests(client).empty())
+            //get the available quests at their location
+            auto available = client_loc.available_quests(client);
+            if(available.empty())
             {
                 ss << "There are no quests at this location.\n";
             }
             else
             {
-                for(int quest_id : world_state.location(client->location_id()).available_quests(client))
+                //create the strings for each available quest
+                for(int quest_id : available)
                 {
                     Quest* quest = quest_manager.quest_for_id(quest_id);
                     if(quest)
@@ -536,13 +545,51 @@ void mud_quests(ENetEvent* event, std::vector<std::string> tokens)
                 }
             }
         }
-        else if(tokens.at(1) == "accept")
-        {
+        else
+        {   
+            //we need 3 arguments for accept/abandon
+            if(tokens.size() < 3)
+            {
+                message_peer(event->peer, "This action needs parameters, try using help!");
+                return;
+            }
 
-        }
-        else if(tokens.at(1) == "abandon")
-        {
+            //get the 3rd argument as an int
+            std::istringstream int_ss(tokens.at(2));
+            if(int_ss.fail())
+            {
+                message_peer(event->peer, "That wasn't an ID! Try giving numbers");
+                return;
+            }
+            int quest_id;
+            int_ss >> quest_id;
 
+            //accept a quest at this location
+            if(tokens.at(1) == "accept")
+            {
+                //check if it's available
+                if(client_loc.is_quest_available(client, quest_id))
+                {
+                    //accept if it is
+                    client->accept_quest(quest_id);
+                    //construct strings for acceptance
+                    ss << "Quest accepted!\n";
+                    Quest* quest = quest_manager.quest_for_id(quest_id);
+                    if(quest)
+                    {
+                        ss << quest->accept_string() << "\n";
+                    }
+                }
+                else
+                {
+                    //otherwise say it's not available
+                    ss << "That quest isn't available here!\n";
+                }
+            }
+            else if(tokens.at(1) == "abandon")
+            {
+                ss << "Coming soon!\n";
+            }
         }
         message_peer(event->peer, ss.str());
     }

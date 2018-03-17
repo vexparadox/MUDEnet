@@ -52,6 +52,16 @@ bool ClientState::has_active_quest(const Quest& quest) const
     return has_active_quest(quest.ID());
 }
 
+void ClientState::accept_quest(int quest_id)
+{
+    m_active_quests.push_back(quest_id);
+}
+
+void ClientState::accept_quest(const Quest& quest)
+{
+    m_active_quests.push_back(quest.ID());
+}
+
 std::string ClientState::quest_status_string(const QuestManager& quest_manager, bool all_quests) const
 {
     std::stringstream ss;
@@ -78,7 +88,7 @@ std::string ClientState::quest_status_string(const QuestManager& quest_manager, 
     }
     else
     {
-        for(int quest_id : m_completed_quests)
+        for(int quest_id : m_active_quests)
         {
             Quest* quest = quest_manager.quest_for_id(quest_id);
             if(quest)
