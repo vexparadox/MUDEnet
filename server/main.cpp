@@ -166,12 +166,12 @@ void user_disconnected(ENetEvent* event)
     ClientState* client_state = client_manager.client_for_id(event->peer->data);
     if(client_state)
     {
-        client_state->SetENetPeer(nullptr);
+        client_state->set_enet_peer(nullptr);
 
-        std::string disconected_string = client_state->Username();
+        std::string disconected_string = client_state->username();
         disconected_string.append(" disconected.");
         send_broadcast(disconected_string);
-        std::cout << client_state->Username() << " disconected." << std::endl;
+        std::cout << client_state->username() << " disconected." << std::endl;
     }
     delete (char*)event->peer->data;
     event->peer->data = nullptr;
@@ -212,7 +212,7 @@ void new_user(ENetEvent* event)
     ClientState* client_ptr = client_manager.client_for_username(event_username);
     if(client_ptr)
     {
-        if(client_ptr->Password() == md5_password)
+        if(client_ptr->password() == md5_password)
         {
             //we malloc the peer data when we register new clients
             //but if the server has restarted and we're using existing loaded client data
@@ -223,7 +223,7 @@ void new_user(ENetEvent* event)
             }
             //write the client ID to their packet
             *(char*)event->peer->data = (char)client_ptr->ID();
-            std::cout << "Returning user with username: " << client_ptr->Username() << std::endl;
+            std::cout << "Returning user with username: " << client_ptr->username() << std::endl;
         }
         else
         {
@@ -233,7 +233,7 @@ void new_user(ENetEvent* event)
             enet_peer_send (event->peer, 0, packet);
             enet_host_flush (host.load());
 
-            std::cout << "Attempted login to account: " << client_ptr->Username() << std::endl;
+            std::cout << "Attempted login to account: " << client_ptr->username() << std::endl;
             enet_packet_destroy(event->packet);
             return;
         }
@@ -243,11 +243,11 @@ void new_user(ENetEvent* event)
         //register a new client
         client_ptr = client_manager.register_new_client(event, event_username, md5_password);
 
-        std::cout << "New user with username: " << client_ptr->Username() << " : " << md5_password << std::endl;
+        std::cout << "New user with username: " << client_ptr->username() << " : " << md5_password << std::endl;
     }
 
     //give the client data the event peer data so we can tell their login status
-    client_ptr->SetENetPeer(event->peer);
+    client_ptr->set_enet_peer(event->peer);
 
     //prep a stream to send back to the new user with their unique ID
     DataStream stream(1024);
@@ -257,11 +257,11 @@ void new_user(ENetEvent* event)
 
     //tell the new user about their UniqueID
     ENetPacket* packet = enet_packet_create (stream.data(), stream.size(), ENET_PACKET_FLAG_RELIABLE);
-    enet_peer_send (client_ptr->Peer(), 0, packet);
+    enet_peer_send (client_ptr->enet_peer(), 0, packet);
     enet_host_flush (host.load());
 
     //send welcome string
-    message_peer(client_ptr->Peer(), world_state.m_welcome_string);
+    message_peer(client_ptr->enet_peer(), world_state.m_welcome_string);
     //send the user the information for where they currently are
     mud_look(event, std::vector<std::string>());
 
@@ -303,7 +303,7 @@ void message_recieved(ENetEvent* event)
     {
         //call the matching mud action with the tokens we've seperated
         found_mud_action->second(event, tokens);
-        command_history.push_back(std::make_pair(client_state->Username(), tokens.front()));
+        command_history.push_back(std::make_pair(client_state->username(), tokens.front()));
     }
     else
     {
@@ -331,7 +331,7 @@ void message_peer(ENetPeer* peer, const std::string& str)
 void mud_look(ENetEvent* event, std::vector<std::string> tokens)
 {
     ClientState* client = client_manager.client_for_id(event->peer->data);
-    const Location& client_loc = world_state.Locations().at(client->LocationID());
+    const Location& client_loc = world_state.Locations().at(client->location_id());
     std::stringstream ss;
     ss << "\n ----" << client_loc.m_title << "----" << "\n";
     if(tokens.size() < 2)
@@ -377,7 +377,7 @@ void mud_say(ENetEvent* event, std::vector<std::string> tokens)
     else
     {
         std::stringstream ss;
-        ss << client->Username() << ":";
+        ss << client->username() << ":";
         //reconstruct from tokens, tbh this could be a lot better...
         for(int i = 1; i < tokens.size(); ++i)
         {
@@ -386,9 +386,9 @@ void mud_say(ENetEvent* event, std::vector<std::string> tokens)
         std::cout << ss.str() << std::endl;
         for(ClientState* state : client_manager.online_users())
         {
-            if(state->Peer() && client->LocationID() == state->LocationID())
+            if(state->enet_peer() && client->location_id() == state->location_id())
             {
-                message_peer(state->Peer(), ss.str());
+                message_peer(state->enet_peer(), ss.str());
             }
         }
     }
@@ -399,7 +399,7 @@ void mud_say(ENetEvent* event, std::vector<std::string> tokens)
 void mud_go(ENetEvent* event, std::vector<std::string> tokens)
 {
     ClientState* client = client_manager.client_for_id(event->peer->data);
-    const Location& client_loc = world_state.Locations().at(client->LocationID());
+    const Location& client_loc = world_state.Locations().at(client->location_id());
     if(tokens.size() < 2)
     {
         message_peer(event->peer, "This action needs parameters, try using help!");
@@ -411,65 +411,65 @@ void mud_go(ENetEvent* event, std::vector<std::string> tokens)
         std::string& param1 = tokens.at(1);
         if(param1 == "n" || param1 == "north")
         {
-            if(client->LocationID() < world_state.m_world_width)
+            if(client->location_id() < world_state.m_world_width)
             {
                 response = invalid_direction;
             }
-            else if (world_state.Locations().at(client->LocationID()-world_state.m_world_width).IsPassable(client) == false)
+            else if (world_state.Locations().at(client->location_id()-world_state.m_world_width).IsPassable(client) == false)
             {
                 response = "That region is impassable.";
             }
             else
             {
-                client->SetLocation(client->LocationID()-world_state.m_world_width);
+                client->set_location(client->location_id()-world_state.m_world_width);
                 response = "You travel north.";
             }
         }
         else if(param1 == "e" || param1 == "east")
         {
-            if((client->LocationID()+1) % world_state.m_world_width == 0)
+            if((client->location_id()+1) % world_state.m_world_width == 0)
             {
                 response = invalid_direction;
             }
-            else if (world_state.Locations().at(client->LocationID()+1).IsPassable(client) == false)
+            else if (world_state.Locations().at(client->location_id()+1).IsPassable(client) == false)
             {
                 response = "That region is impassable.";
             }
             else
             {
-                client->SetLocation(client->LocationID()+1);
+                client->set_location(client->location_id()+1);
                 response = "You travel east.";
             }
         }
         else if(param1 == "s" || param1 == "south")
         {
-            if((client->LocationID() / world_state.m_world_height) >= world_state.m_world_height)
+            if((client->location_id() / world_state.m_world_height) >= world_state.m_world_height)
             {
                 response = invalid_direction;
             }
-            else if (world_state.Locations().at(client->LocationID()+world_state.m_world_width).IsPassable(client) == false)
+            else if (world_state.Locations().at(client->location_id()+world_state.m_world_width).IsPassable(client) == false)
             {
                 response = "That region is impassable.";
             }
             else
             {
-                client->SetLocation(client->LocationID()+world_state.m_world_width);
+                client->set_location(client->location_id()+world_state.m_world_width);
                 response = "You travel south.";
             }
         }
         else if(param1 == "w" || param1 == "west")
         {
-            if(client->LocationID() % world_state.m_world_width == 0)
+            if(client->location_id() % world_state.m_world_width == 0)
             {
                 response = invalid_direction;
             }
-            else if (world_state.Locations().at(client->LocationID()-1).IsPassable(client) == false)
+            else if (world_state.Locations().at(client->location_id()-1).IsPassable(client) == false)
             {
                 response = "That region is impassable.";
             }
             else
             {
-                client->SetLocation(client->LocationID()-1);
+                client->set_location(client->location_id()-1);
                 response = "You travel west.";
             }
         }

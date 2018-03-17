@@ -75,7 +75,7 @@ bool ClientManager::load_save(const std::string& filename)
 	for(auto client : client_array)
 	{
 		ClientState* new_state = new ClientState(client["id"], client["username"], client["password"]);
-		new_state->SetLocation(client["location"]);
+		new_state->set_location(client["location"]);
 		client_states.push_back(new_state);
 	}
 
@@ -88,18 +88,18 @@ void ClientManager::print_users()
 	std::cout << std::endl << "Online Users: " << std::endl;
     for(ClientState* state : client_states)
     {
-        if(state && state->Peer())
+        if(state && state->enet_peer())
         {
-            std::cout << state->Username() << std::endl;
+            std::cout << state->username() << std::endl;
         }
     }
 
     std::cout << "Offline Users: " << std::endl;
     for(ClientState* state : client_states)
     {
-        if(state && state->Peer() == nullptr)
+        if(state && state->enet_peer() == nullptr)
         {
-            std::cout << state->Username() << std::endl;
+            std::cout << state->username() << std::endl;
         }
     }
     std::cout << std::endl;
@@ -132,7 +132,7 @@ std::vector<ClientState*> ClientManager::online_users()
 	std::vector<ClientState*> users;
 	for(ClientState* client_ptr : client_states)
 	{
-		if(client_ptr->Peer())
+		if(client_ptr->enet_peer())
 		{
 			users.push_back(client_ptr);
 		}
@@ -156,7 +156,7 @@ ClientState* ClientManager::client_for_username(const std::string& username)
 {
 	auto found_client = std::find_if(client_states.begin(), client_states.end(), [username](ClientState* state)
 	{
-		return state->Username() == username;
+		return state->username() == username;
 	});
 	if(found_client != client_states.end())
 	{

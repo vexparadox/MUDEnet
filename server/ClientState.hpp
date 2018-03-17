@@ -20,14 +20,14 @@ public:
 	ClientState(int id, const std::string& username, const std::string& password) 
 	: m_id(id), m_username(username), m_password(password) {};
 
-	void SetENetPeer(ENetPeer* peer) { m_enet_peer = peer; }
-	ENetPeer* Peer() { return m_enet_peer; }
+	void set_enet_peer(ENetPeer* peer) { m_enet_peer = peer; }
+	ENetPeer* enet_peer() { return m_enet_peer; }
 	void save(json&) const;
 
 	const Inventory& inventory() const { return m_inventory; }
-	const std::string& Username() const { return m_username; }
-	const std::string& Password() const { return m_password; }
+	const std::string& username() const { return m_username; }
+	const std::string& password() const { return m_password; }
 	int ID() const { return m_id; }
-	int LocationID() const {return m_locationid;}
-	void SetLocation(int l) { m_locationid = l;}
+	int location_id() const {return m_locationid;}
+	void set_location(int l) { m_locationid = l;}
 };
