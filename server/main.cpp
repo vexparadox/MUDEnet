@@ -488,6 +488,7 @@ void mud_help(ENetEvent* event, std::vector<std::string>)
     ss << "go <direction>" << "\n";
     ss << "look (direction)" << "\n";
     ss << "say <message>" << "\n";
+    ss << "inv" << "\n";
     ss << "exit";
 
     message_peer(event->peer, ss.str());
