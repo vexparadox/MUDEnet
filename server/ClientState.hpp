@@ -5,6 +5,7 @@
 
 using json = nlohmann::json;
 class Quest;
+class QuestManager;
 class ClientState
 {
 private:
@@ -31,6 +32,7 @@ public:
 	const Inventory& inventory() const { return m_inventory; }
 	const std::string& username() const { return m_username; }
 	const std::string& password() const { return m_password; }
+	std::string quest_status_string(const QuestManager&, bool all_quests) const;
 	bool has_completed_quest(int quest_id) const;
 	bool has_completed_quest(const Quest&) const;
 	int ID() const { return m_id; }

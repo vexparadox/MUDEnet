@@ -39,6 +39,7 @@ int main(int argc, char const *argv[])
     mud_actions.push_back(std::make_pair("go", mud_go));
     mud_actions.push_back(std::make_pair("help", mud_help));
     mud_actions.push_back(std::make_pair("inv", mud_inv));
+    mud_actions.push_back(std::make_pair("quests", mud_quests));
 
     std::cout << "Server was started on " << argv[1] << ":" << argv[2] << std::endl;
 
@@ -485,11 +486,12 @@ void mud_help(ENetEvent* event, std::vector<std::string>)
     std::stringstream ss;
     ss << "\n";
     ss << "You can use the following commands:" << "\n";
-    ss << "go <direction>" << "\n";
-    ss << "look (direction)" << "\n";
-    ss << "say <message>" << "\n";
-    ss << "inv" << "\n";
-    ss << "exit";
+    ss << "go <direction>   -  Go in a direction given" << "\n";
+    ss << "look (direction) -  Look around, direction optional" << "\n";
+    ss << "say <message>    -  Speak to the people at your location" << "\n";
+    ss << "quests (all)     -  See your quests statuses" << "\n";
+    ss << "inv              -  Check your inventory" << "\n";
+    ss << "exit             -  Logout";
 
     message_peer(event->peer, ss.str());
 }
@@ -500,5 +502,14 @@ void mud_inv(ENetEvent* event, std::vector<std::string>)
     if(client)
     {
         message_peer(event->peer, client->inventory().print_string(item_manager));
+    }
+}
+
+void mud_quests(ENetEvent* event, std::vector<std::string> tokens)
+{
+    ClientState* client = client_manager.client_for_id(event->peer->data);
+    if(client)
+    {
+        message_peer(event->peer, client->quest_status_string(quest_manager, tokens.size() > 1 && tokens.at(1) == "all"));
     }
 }

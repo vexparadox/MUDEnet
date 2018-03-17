@@ -1,5 +1,7 @@
 #include "ClientState.hpp"
 #include "Quest.hpp"
+#include "QuestManager.hpp"
+#include <sstream>
 ClientState::ClientState(json& client_obj) : m_inventory(client_obj["inventory"])
 {
 	m_id = client_obj["id"];
@@ -38,4 +40,43 @@ bool ClientState::has_completed_quest(int quest_id) const
 bool ClientState::has_completed_quest(const Quest& quest) const
 {
     return has_completed_quest(quest.ID());
+}
+
+std::string ClientState::quest_status_string(const QuestManager& quest_manager, bool all_quests) const
+{
+    std::stringstream ss;
+    if(all_quests)
+    {
+        ss << "---- Completed Quests ----\n";
+        if(m_completed_quests.empty())
+        {
+            ss << "You haven't completed any quests yet.\n";
+        }
+        for(int quest_id : m_completed_quests)
+        {
+            Quest* quest = quest_manager.quest_for_id(quest_id);
+            if(quest)
+            {
+                ss << quest->title() << " - " << quest->description() << "\n";
+            }
+        } 
+    }
+    ss << "---- Active Quests ----\n";
+    if(m_active_quests.empty())
+    {
+        ss << "You have no active quests.\n";
+    }
+    else
+    {
+        for(int quest_id : m_completed_quests)
+        {
+            Quest* quest = quest_manager.quest_for_id(quest_id);
+            if(quest)
+            {
+                ss << quest->title() << " - " << quest->description() << "\n";
+                ss << "Cash Reward: " << quest->cash_reward() << "\n";
+            }
+        } 
+    }
+    return ss.str();
 }

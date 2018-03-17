@@ -14,4 +14,7 @@ public:
 	Quest(json&); // load from file
 
 	int ID() const {return m_id;}
+	const std::string& title() const { return m_title; }
+	const std::string& description() const { return m_description; }
+	int cash_reward() const { return m_cash_reward; }
 };
