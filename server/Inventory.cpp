@@ -27,8 +27,7 @@ std::string Inventory::print_string(const ItemManager& item_manager) const
 		Item* item = item_manager.item_for_id(item_id);
 		if(item)
 		{
-			ss << item->Name() << "\n";
-			ss << item->Description() << "\n";
+			ss << item->name() << " - " << item->description() << "\n";
 		}
 	}
 	return ss.str();
