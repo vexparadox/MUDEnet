@@ -141,7 +141,7 @@ void take_input()
 void notify_exit()
 {
     DataStream broadcast_stream(1);
-    broadcast_stream.write(Byte(2));
+    broadcast_stream.write(Byte(MESSAGE_TYPE_SERVER_SHUTDOWN));
     ENetPacket* packet = enet_packet_create (broadcast_stream.data(), broadcast_stream.size(), ENET_PACKET_FLAG_RELIABLE);
     enet_host_broadcast (host.load(), 0, packet);
     enet_host_flush (host.load());

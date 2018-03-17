@@ -17,6 +17,10 @@
 #include <algorithm>
 
 #define CLIENT_VERSION_REQUIRED 0
+#define MESSAGE_TYPE_SERVER_SHUTDOWN 2
+#define MESSAGE_TYPE_BAD_LOGIN 3
+#define MESSAGE_TYPE_BAD_CLIENT_VERSION 4
+
 
 //type def functions 
 typedef void (* Action)(ENetEvent* event);
@@ -33,10 +37,6 @@ void new_user(ENetEvent* event);
 void user_disconnected(ENetEvent* event);
 void send_broadcast(const std::string&);
 void notify_exit();
-
-#define MESSAGE_TYPE_BAD_LOGIN 3
-#define MESSAGE_TYPE_BAD_CLIENT_VERSION 4
-
 
 //the last time the game saved
 unsigned long last_save_time = 0;
@@ -59,6 +59,7 @@ std::vector<std::pair<std::string, MUDAction>> mud_actions;
 
 void message_peer(ENetPeer* peer, const std::string& str);
 void message_peer(ENetPeer* peer, Byte);
+
 void mud_look(ENetEvent* event, std::vector<std::string>);
 void mud_say(ENetEvent* event, std::vector<std::string>);
 void mud_go(ENetEvent* event, std::vector<std::string>);

@@ -41,6 +41,7 @@ B1 is the ID of the packets action, this can be used in a switch or array of fun
 | New user |  1 | 0-255 | NULL        | B2 is userID, this is the clients secret ID they use to communicate with the server. |
 | Server Killed |  2 | NULL | NULL        | Server has terminated, shut down the client |
 | Bad Password |  3 | NULL | NULL        | Bad password given, shut down the client |
+| Bad Client Version |  4 | NULL | NULL        | The client is the wrong version for this server, shut down the client |
 
 ### Client to Server packets:
 Note that B2 is used for UserIDs, the Client doesn't need to know about its own ID. This will be filled by the server. Leave B2 empty for clarity, it's ignored by the Server anyway.
