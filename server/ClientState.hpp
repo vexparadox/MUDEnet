@@ -4,6 +4,7 @@
 #include "Inventory.hpp"
 
 using json = nlohmann::json;
+class Quest;
 class ClientState
 {
 private:
@@ -13,6 +14,9 @@ private:
 	int m_locationid = 0;
 
 	Inventory m_inventory;
+
+	std::vector<int> m_completed_quests;
+	std::vector<int> m_active_quests;
 
 	ENetPeer* m_enet_peer = nullptr; // set only when the user is connected
 public:
@@ -27,6 +31,8 @@ public:
 	const Inventory& inventory() const { return m_inventory; }
 	const std::string& username() const { return m_username; }
 	const std::string& password() const { return m_password; }
+	bool has_completed_quest(int quest_id) const;
+	bool has_completed_quest(const Quest&) const;
 	int ID() const { return m_id; }
 	int location_id() const {return m_locationid;}
 	void set_location(int l) { m_locationid = l;}
