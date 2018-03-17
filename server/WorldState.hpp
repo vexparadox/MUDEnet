@@ -25,11 +25,14 @@ struct Location
 class WorldState
 {
 	std::vector<Location> m_locations;
-public:
 	std::string m_welcome_string;
 	int m_world_height;
 	int m_world_width;
-
-	const std::vector<Location>& Locations() { return m_locations; };
+public:
+	int height() const { return m_world_height; }
+	int width() const { return m_world_width; }
+	const std::string& welcome_string() const { return m_welcome_string; }
+	const Location& location(int location_id) const { return m_locations.at(location_id); }
+	const std::vector<Location>& locations() { return m_locations; };
 	bool load(const std::string& filename);
 };

@@ -22,6 +22,5 @@ std::string Inventory::print_string(const ItemManager& item_manager) const
 			ss << item->Description() << "\n";
 		}
 	}
-	ss << "\n";
 	return ss.str();
 }

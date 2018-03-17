@@ -261,7 +261,7 @@ void new_user(ENetEvent* event)
     enet_host_flush (host.load());
 
     //send welcome string
-    message_peer(client_ptr->enet_peer(), world_state.m_welcome_string);
+    message_peer(client_ptr->enet_peer(), world_state.welcome_string());
     //send the user the information for where they currently are
     mud_look(event, std::vector<std::string>());
 
@@ -331,7 +331,7 @@ void message_peer(ENetPeer* peer, const std::string& str)
 void mud_look(ENetEvent* event, std::vector<std::string> tokens)
 {
     ClientState* client = client_manager.client_for_id(event->peer->data);
-    const Location& client_loc = world_state.Locations().at(client->location_id());
+    const Location& client_loc = world_state.location(client->location_id());
     std::stringstream ss;
     ss << "\n ----" << client_loc.m_title << "----" << "\n";
     if(tokens.size() < 2)
@@ -399,7 +399,7 @@ void mud_say(ENetEvent* event, std::vector<std::string> tokens)
 void mud_go(ENetEvent* event, std::vector<std::string> tokens)
 {
     ClientState* client = client_manager.client_for_id(event->peer->data);
-    const Location& client_loc = world_state.Locations().at(client->location_id());
+    const Location& client_loc = world_state.location(client->location_id());
     if(tokens.size() < 2)
     {
         message_peer(event->peer, "This action needs parameters, try using help!");
@@ -411,27 +411,27 @@ void mud_go(ENetEvent* event, std::vector<std::string> tokens)
         std::string& param1 = tokens.at(1);
         if(param1 == "n" || param1 == "north")
         {
-            if(client->location_id() < world_state.m_world_width)
+            if(client->location_id() < world_state.width())
             {
                 response = invalid_direction;
             }
-            else if (world_state.Locations().at(client->location_id()-world_state.m_world_width).IsPassable(client) == false)
+            else if (world_state.location(client->location_id()-world_state.width()).IsPassable(client) == false)
             {
                 response = "That region is impassable.";
             }
             else
             {
-                client->set_location(client->location_id()-world_state.m_world_width);
+                client->set_location(client->location_id()-world_state.width());
                 response = "You travel north.";
             }
         }
         else if(param1 == "e" || param1 == "east")
         {
-            if((client->location_id()+1) % world_state.m_world_width == 0)
+            if((client->location_id()+1) % world_state.width() == 0)
             {
                 response = invalid_direction;
             }
-            else if (world_state.Locations().at(client->location_id()+1).IsPassable(client) == false)
+            else if (world_state.location(client->location_id()+1).IsPassable(client) == false)
             {
                 response = "That region is impassable.";
             }
@@ -443,27 +443,27 @@ void mud_go(ENetEvent* event, std::vector<std::string> tokens)
         }
         else if(param1 == "s" || param1 == "south")
         {
-            if((client->location_id() / world_state.m_world_height) >= world_state.m_world_height)
+            if((client->location_id() / world_state.height()) >= world_state.height())
             {
                 response = invalid_direction;
             }
-            else if (world_state.Locations().at(client->location_id()+world_state.m_world_width).IsPassable(client) == false)
+            else if (world_state.location(client->location_id()+world_state.width()).IsPassable(client) == false)
             {
                 response = "That region is impassable.";
             }
             else
             {
-                client->set_location(client->location_id()+world_state.m_world_width);
+                client->set_location(client->location_id()+world_state.width());
                 response = "You travel south.";
             }
         }
         else if(param1 == "w" || param1 == "west")
         {
-            if(client->location_id() % world_state.m_world_width == 0)
+            if(client->location_id() % world_state.width() == 0)
             {
                 response = invalid_direction;
             }
-            else if (world_state.Locations().at(client->location_id()-1).IsPassable(client) == false)
+            else if (world_state.location(client->location_id()-1).IsPassable(client) == false)
             {
                 response = "That region is impassable.";
             }
