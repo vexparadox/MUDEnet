@@ -7,16 +7,16 @@ using json = nlohmann::json;
 class ClientState
 {
 private:
-	const std::string m_username;
-	const std::string m_password;
-	const int m_id = -1;
+	std::string m_username;
+	std::string m_password;
+	int m_id = -1;
 	int m_locationid = 0;
 
 	Inventory m_inventory;
 
 	ENetPeer* m_enet_peer = nullptr; // set only when the user is connected
 public:
-	ClientState(){};
+	ClientState(json&); // load from file
 	ClientState(int id, const std::string& username, const std::string& password) 
 	: m_id(id), m_username(username), m_password(password) {};
 

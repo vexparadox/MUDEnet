@@ -74,8 +74,7 @@ bool ClientManager::load_save(const std::string& filename)
 	auto client_array = json_obj["clients"];
 	for(auto client : client_array)
 	{
-		ClientState* new_state = new ClientState(client["id"], client["username"], client["password"]);
-		new_state->set_location(client["location"]);
+		ClientState* new_state = new ClientState(client);
 		client_states.push_back(new_state);
 	}
 

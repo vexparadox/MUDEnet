@@ -7,6 +7,15 @@ void Inventory::save(json& inv_obj) const
 	inv_obj["item_ids"] = m_item_ids;
 }
 
+Inventory::Inventory(json& inv_obj)
+{
+	for(auto item : inv_obj["item_ids"])
+	{
+		m_item_ids.push_back(item);
+	}
+	m_cash = inv_obj["cash"];	
+}
+
 std::string Inventory::print_string(const ItemManager& item_manager) const
 {
 	std::stringstream ss;
