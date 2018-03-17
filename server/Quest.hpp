@@ -8,6 +8,8 @@ class Quest
 	int m_id;
 	std::string m_title;
 	std::string m_description;
+	std::string m_complete_string;
+	std::string m_accept_string;
 	std::vector<int> m_item_rewards;
 	int m_cash_reward;
 public:

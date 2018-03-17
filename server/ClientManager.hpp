@@ -4,7 +4,7 @@
 #include <string>
 
 class ClientState;
-#define CLIENT_SAVE_VERSION 1
+#define CLIENT_SAVE_VERSION 2
 class ClientManager
 {
 private:

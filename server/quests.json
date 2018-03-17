@@ -5,6 +5,8 @@
 			"id": 0,
 			"title": "Test",
 			"description": "A test quest!",
+			"accept" : "Thank you so much!",
+			"complete": "Wow you did it!",
 			"item_rewards": [0],
 			"cash_reward": 20
 		}
