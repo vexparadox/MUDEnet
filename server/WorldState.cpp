@@ -2,9 +2,25 @@
 #include <iostream>
 #include <fstream>
 #include "ClientState.hpp"
-#include "../shared/json.hpp"
 
-using json = nlohmann::json;
+Location::Location(json& location_obj)
+{
+	m_id = location_obj["id"];
+	m_title = location_obj["title"];
+	m_description = location_obj["description"];
+	m_here = location_obj["here"];
+	m_north = location_obj["n"];
+	m_east = location_obj["e"];
+	m_south = location_obj["s"];
+	m_west = location_obj["w"];
+	m_passable = location_obj["passable"];
+}
+
+bool Location::IsPassable(ClientState* client_state) const
+{
+	//check client has required items etcetc
+	return client_state && m_passable;
+}
 
 bool WorldState::load(const std::string& filename)
 {
@@ -20,22 +36,10 @@ bool WorldState::load(const std::string& filename)
 	m_world_height = json_obj["height"];
 	m_world_width = json_obj["width"];
 	m_welcome_string = json_obj["welcome_text"];
-	auto world_array = json_obj["worldmap"];
-	for(auto world : world_array)
+	for(auto location : json_obj["worldmap"])
 	{
-		std::vector<std::string> required_items;
-		for(auto item : world["requireditems"])
-		{
-			required_items.push_back(item.get<std::string>());
-		}
-		m_locations.emplace_back(Location(world["id"], world["title"], world["description"], world["here"], world["n"], world["e"], world["s"], world["w"], std::move(required_items), world["passable"]));
+		m_locations.emplace_back(Location(location));
 	}
 	std::cout << "World loaded correctly: " << filename << std::endl;
 	return true;
-}
-
-bool Location::IsPassable(ClientState* client_state) const
-{
-	//check client has required items etcetc
-	return client_state && m_passable;
 }

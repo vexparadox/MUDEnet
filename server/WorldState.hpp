@@ -1,7 +1,11 @@
 #pragma once
 #include <string>
 #include <vector>
+#include "../shared/json.hpp"
+
 class ClientState;
+
+using json = nlohmann::json;
 
 struct Location
 {
@@ -15,8 +19,7 @@ struct Location
 	std::string m_west;
 	std::vector<std::string> m_required_items;
 	bool m_passable;
-	Location(int id, const std::string& title, const std::string& description, const std::string& here, const std::string& north, const std::string& east, const std::string& south, const std::string& west, std::vector<std::string>&& required_items, bool passable)
-	: m_id(id), m_title(title), m_description(description), m_here(here), m_north(north), m_east(east), m_south(south), m_west(west), m_required_items(required_items), m_passable(passable){};
+	Location(json&);
 
 	bool IsPassable(ClientState*) const;
 };
