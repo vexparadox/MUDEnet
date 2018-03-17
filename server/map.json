@@ -13,7 +13,8 @@
 			"s": "Turning to the south, you see the west side of the town square, there's a couple of tradesmen selling exotic goods from a far off land.",
 			"w": "To the west, the town walls tower over you. They're simple but effective.",
 			"requireditems": [],
-			"passable": true
+			"passable": true,
+			"quests" : []
 		},
 		{
 			"id": 1,
@@ -25,7 +26,8 @@
 			"s": "To the south is the centre of town, it's busy and loud.",
 			"w": "To the west is the back gate of Gwynhaven. You think back to when you first caught glimpse of the wooden barricades through the trees.",
 			"requireditems": [], 
-			"passable": true
+			"passable": true,
+			"quests" : []
 		},
 		{
 			"id": 2,
@@ -37,7 +39,8 @@
 			"s": "The south is blocked by buildings.",
 			"w": "Turning to the west there's the north side of the town centre.",
 			"requireditems": [],
-			"passable": true
+			"passable": true,
+			"quests" : []
 		},
 		{
 			"id": 3,
@@ -49,7 +52,8 @@
 			"s": "The south is impassable, once again the black has caught up to you.",
 			"w": "Turning to the west you see the face of the void, it stares back.",
 			"requireditems": ["cut"],
-			"passable": true
+			"passable": true,
+			"quests" : []
 		},
 		{
 			"id": 4,
@@ -61,7 +65,8 @@
 			"s": "The south sees the world fall away into black, you turn away.",
 			"w": "Turning to the west you see the forest continue.",
 			"requireditems": ["cut"],
-			"passable": true
+			"passable": true,
+			"quests" : []
 		},
 		{
 			"id": 5,
@@ -73,7 +78,8 @@
 			"s": "",
 			"w": "",
 			"requireditems": [],
-			"passable": false
+			"passable": false,
+			"quests" : []
 		}
 	]
 }

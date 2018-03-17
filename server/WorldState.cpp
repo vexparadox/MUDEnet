@@ -14,6 +14,10 @@ Location::Location(json& location_obj)
 	m_south = location_obj["s"];
 	m_west = location_obj["w"];
 	m_passable = location_obj["passable"];
+	for(auto quest : location_obj["quests"])
+	{
+		m_available_quests.push_back(quest);
+	}
 }
 
 bool Location::IsPassable(ClientState* client_state) const
