@@ -34,6 +34,10 @@ void user_disconnected(ENetEvent* event);
 void send_broadcast(const std::string&);
 void notify_exit();
 
+#define MESSAGE_TYPE_BAD_LOGIN 3
+#define MESSAGE_TYPE_BAD_CLIENT_VERSION 4
+
+
 //the last time the game saved
 unsigned long last_save_time = 0;
 int save_interval_seconds = 60;
@@ -54,6 +58,7 @@ ItemManager item_manager;
 std::vector<std::pair<std::string, MUDAction>> mud_actions;
 
 void message_peer(ENetPeer* peer, const std::string& str);
+void message_peer(ENetPeer* peer, Byte);
 void mud_look(ENetEvent* event, std::vector<std::string>);
 void mud_say(ENetEvent* event, std::vector<std::string>);
 void mud_go(ENetEvent* event, std::vector<std::string>);

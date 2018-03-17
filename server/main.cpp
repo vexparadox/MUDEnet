@@ -191,12 +191,7 @@ void new_user(ENetEvent* event)
 
     if(client_version != CLIENT_VERSION_REQUIRED)
     {
-        DataStream bad_client_version_stream(1);
-        bad_client_version_stream.write(Byte(4)); // bad client version
-        ENetPacket* packet = enet_packet_create (bad_client_version_stream.data(), bad_client_version_stream.size(), ENET_PACKET_FLAG_RELIABLE);
-        enet_peer_send (event->peer, 0, packet);
-        enet_host_flush (host.load());
-
+        message_peer(event->peer, MESSAGE_TYPE_BAD_CLIENT_VERSION);
         std::cout << "Incorrect client tried to connect." << std::endl;
         enet_packet_destroy(event->packet);
         return;
@@ -227,12 +222,7 @@ void new_user(ENetEvent* event)
         }
         else
         {
-            DataStream bad_password_stream(1);
-            bad_password_stream.write(Byte(3)); // bad login
-            ENetPacket* packet = enet_packet_create (bad_password_stream.data(), bad_password_stream.size(), ENET_PACKET_FLAG_RELIABLE);
-            enet_peer_send (event->peer, 0, packet);
-            enet_host_flush (host.load());
-
+            message_peer(event->peer, MESSAGE_TYPE_BAD_LOGIN);
             std::cout << "Attempted login to account: " << client_ptr->username() << std::endl;
             enet_packet_destroy(event->packet);
             return;
@@ -317,10 +307,19 @@ void message_peer(ENetPeer* peer, const std::string& str)
     //sends the string given to the peer passed
     //sends as a message from the server to the client, the client should just print this
     DataStream stream(1024);
-    stream.clear_data();
     stream.write(Byte(0)); // Server to client message
     stream.write(Byte(255));
     stream.write(str);
+    ENetPacket* packet = enet_packet_create (stream.data(), stream.size(), ENET_PACKET_FLAG_RELIABLE);
+    enet_peer_send (peer, 0, packet);
+    enet_host_flush (host.load());
+}
+
+void message_peer(ENetPeer* peer, Byte byte)
+{
+    //sends a single byte packet to a peer, used for bad passwords, disconnects etc
+    DataStream stream(1);
+    stream.write(byte); // Server to client message
     ENetPacket* packet = enet_packet_create (stream.data(), stream.size(), ENET_PACKET_FLAG_RELIABLE);
     enet_peer_send (peer, 0, packet);
     enet_host_flush (host.load());
