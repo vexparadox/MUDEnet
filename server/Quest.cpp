@@ -1,5 +1,5 @@
 #include "Quest.hpp"
-
+#include <sstream>
 Quest::Quest(json& quest_obj)
 {
 	m_id = quest_obj["id"];
@@ -12,4 +12,15 @@ Quest::Quest(json& quest_obj)
 	{
 		m_item_rewards.push_back(item_reward);
 	}
+}
+
+std::string Quest::quest_string(bool show_rewards) const
+{
+	std::stringstream ss;
+    ss << "["<< ID() << "] "<< title() << " - " << description() << "\n";
+    if(show_rewards)
+	{
+		ss << "Cash Reward: " << cash_reward() << "\n";
+	}
+	return ss.str();
 }

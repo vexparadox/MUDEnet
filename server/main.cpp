@@ -486,12 +486,12 @@ void mud_help(ENetEvent* event, std::vector<std::string>)
     std::stringstream ss;
     ss << "\n";
     ss << "You can use the following commands:" << "\n";
-    ss << "go <direction>   -  Go in a direction given" << "\n";
-    ss << "look (direction) -  Look around, direction optional" << "\n";
-    ss << "say <message>    -  Speak to the people at your location" << "\n";
-    ss << "quests (all)     -  See your quests statuses" << "\n";
-    ss << "inv              -  Check your inventory" << "\n";
-    ss << "exit             -  Logout";
+    ss << "go <direction>                   -  Go in a direction given" << "\n";
+    ss << "look (direction)                 -  Look around, direction optional" << "\n";
+    ss << "say <message>                    -  Speak to the people at your location" << "\n";
+    ss << "quests <list/accept/abandon> (id)-  List/accept/abandon quests" << "\n";
+    ss << "inv                              -  Check your inventory" << "\n";
+    ss << "exit                             -  Logout";
 
     message_peer(event->peer, ss.str());
 }
@@ -507,9 +507,43 @@ void mud_inv(ENetEvent* event, std::vector<std::string>)
 
 void mud_quests(ENetEvent* event, std::vector<std::string> tokens)
 {
+    if(tokens.size() < 2)
+    {
+        message_peer(event->peer, "This action needs parameters, try using help!");
+        return;
+    }
     ClientState* client = client_manager.client_for_id(event->peer->data);
     if(client)
     {
-        message_peer(event->peer, client->quest_status_string(quest_manager, tokens.size() > 1 && tokens.at(1) == "all"));
+        std::stringstream ss;
+        if(tokens.at(1) == "list")
+        {
+            ss << client->quest_status_string(quest_manager, false);
+            ss << "---- Available Quests ----\n";
+            if(world_state.location(client->location_id()).available_quests(client).empty())
+            {
+                ss << "There are no quests at this location.\n";
+            }
+            else
+            {
+                for(int quest_id : world_state.location(client->location_id()).available_quests(client))
+                {
+                    Quest* quest = quest_manager.quest_for_id(quest_id);
+                    if(quest)
+                    {
+                        ss << quest->quest_string(true);
+                    }
+                }
+            }
+        }
+        else if(tokens.at(1) == "accept")
+        {
+
+        }
+        else if(tokens.at(1) == "abandon")
+        {
+
+        }
+        message_peer(event->peer, ss.str());
     }
 }

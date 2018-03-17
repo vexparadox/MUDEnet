@@ -35,6 +35,8 @@ public:
 	std::string quest_status_string(const QuestManager&, bool all_quests) const;
 	bool has_completed_quest(int quest_id) const;
 	bool has_completed_quest(const Quest&) const;
+	bool has_active_quest(const Quest&) const;
+	bool has_active_quest(int quest_id) const;
 	int ID() const { return m_id; }
 	int location_id() const {return m_locationid;}
 	void set_location(int l) { m_locationid = l;}

@@ -42,6 +42,16 @@ bool ClientState::has_completed_quest(const Quest& quest) const
     return has_completed_quest(quest.ID());
 }
 
+bool ClientState::has_active_quest(int quest_id) const
+{
+    return std::find(m_active_quests.begin(), m_active_quests.end(), quest_id) != m_active_quests.end();
+}
+
+bool ClientState::has_active_quest(const Quest& quest) const
+{
+    return has_active_quest(quest.ID());
+}
+
 std::string ClientState::quest_status_string(const QuestManager& quest_manager, bool all_quests) const
 {
     std::stringstream ss;
@@ -57,7 +67,7 @@ std::string ClientState::quest_status_string(const QuestManager& quest_manager, 
             Quest* quest = quest_manager.quest_for_id(quest_id);
             if(quest)
             {
-                ss << quest->title() << " - " << quest->description() << "\n";
+                ss << quest->quest_string(false);
             }
         } 
     }
@@ -73,8 +83,7 @@ std::string ClientState::quest_status_string(const QuestManager& quest_manager, 
             Quest* quest = quest_manager.quest_for_id(quest_id);
             if(quest)
             {
-                ss << quest->title() << " - " << quest->description() << "\n";
-                ss << "Cash Reward: " << quest->cash_reward() << "\n";
+                ss << quest->quest_string(true);
             }
         } 
     }

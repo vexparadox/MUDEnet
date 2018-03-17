@@ -31,6 +31,17 @@ bool Location::IsPassable(ClientState* client_state) const
 	return client_state && m_passable;
 }
 
+std::vector<int> Location::available_quests(ClientState* client_state) const
+{
+	std::vector<int> quests;
+	quests.reserve(m_available_quests.size());
+	std::copy_if(m_available_quests.begin(), m_available_quests.end(), quests.begin(), [client_state](int quest_id)
+	{
+		return client_state->has_completed_quest(quest_id) == false && client_state->has_active_quest(quest_id) == false;
+	});
+	return quests;
+}
+
 bool WorldState::load(const std::string& filename)
 {
 	json json_obj;
