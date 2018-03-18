@@ -39,7 +39,7 @@ int main(int argc, char const *argv[])
     mud_actions.push_back(std::make_pair("go", mud_go));
     mud_actions.push_back(std::make_pair("help", mud_help));
     mud_actions.push_back(std::make_pair("inv", mud_inv));
-    mud_actions.push_back(std::make_pair("quests", mud_quests));
+    mud_actions.push_back(std::make_pair("quest", mud_quests));
 
     std::cout << "Server was started on " << argv[1] << ":" << argv[2] << std::endl;
 
@@ -490,7 +490,7 @@ void mud_help(ENetEvent* event, std::vector<std::string>)
     ss << "go <direction>                   -  Go in a direction given" << "\n";
     ss << "look (direction)                 -  Look around, direction optional" << "\n";
     ss << "say <message>                    -  Speak to the people at your location" << "\n";
-    ss << "quests <list/accept/abandon> (id)-  List/accept/abandon quests" << "\n";
+    ss << "quest <list/accept/abandon/complete> (id) -  List/accept/abandon/complete quests" << "\n";
     ss << "inv                              -  Check your inventory" << "\n";
     ss << "exit                             -  Logout";
 
@@ -588,7 +588,15 @@ void mud_quests(ENetEvent* event, std::vector<std::string> tokens)
             }
             else if(tokens.at(1) == "abandon")
             {
-                ss << "Coming soon!\n";
+                if(client->has_active_quest(quest_id))
+                {
+                    client->abandon_quest(quest_id);
+                    ss << "Quest abandoned.\n";
+                }
+                else
+                {
+                    ss << "You're not currently on that quest.\n";
+                }
             }
         }
         message_peer(event->peer, ss.str());

@@ -35,6 +35,8 @@ public:
 	std::string quest_status_string(const QuestManager&, bool all_quests) const;
 	void accept_quest(int quest_id);
 	void accept_quest(const Quest&);
+	void abandon_quest(int quest_id);
+	void abandon_quest(const Quest&);
 	bool has_completed_quest(int quest_id) const;
 	bool has_completed_quest(const Quest&) const;
 	bool has_active_quest(const Quest&) const;

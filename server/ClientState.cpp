@@ -62,6 +62,16 @@ void ClientState::accept_quest(const Quest& quest)
     m_active_quests.push_back(quest.ID());
 }
 
+void ClientState::abandon_quest(int quest_id)
+{
+    m_active_quests.erase(std::remove(m_active_quests.begin(), m_active_quests.end(), quest_id), m_active_quests.end());
+}
+
+void ClientState::abandon_quest(const Quest& quest)
+{
+    abandon_quest(quest.ID());
+}
+
 std::string ClientState::quest_status_string(const QuestManager& quest_manager, bool all_quests) const
 {
     std::stringstream ss;
