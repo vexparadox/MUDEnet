@@ -3,12 +3,12 @@
 	[
 		{
 			"id": 0,
-			"title": "Sticks",
-			"description": "A trader in Gwynhaven needs some sticks!",
-			"accept" : "Find a stick!",
-			"complete": "Wow you did it! Here have some cash.",
+			"title": "A wooden stick",
+			"description": "The man turns to you with a glint in his eye, `here boi, get a me a stick from that alleyway`",
+			"accept" : "Thank you! I will give you some money for it.",
+			"complete": "Wow you did it! Here, have 200 gold.",
 			"item_rewards": [],
-			"cash_reward": 20,
+			"cash_reward": 200,
 			"required_items" : [0],
 			"required_location" : 0
 		}

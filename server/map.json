@@ -14,21 +14,21 @@
 			"w": "To the west, the town walls tower over you. They're simple but effective.",
 			"requireditems": [],
 			"passable": true,
-			"quests" : [0],
+			"quests" : [],
 			"items" : []
 		},
 		{
 			"id": 1,
 			"title": "Gwynhaven - North Town Square",
 			"description": "The north side of the town square of Gwynhaven.",
-			"here": "The buildings around you get bigger as you get closer to the centre of the town. They're made from a cold, pale grey stone. There are a few stalls in the vicinity.",
+			"here": "The buildings around you get bigger as you get closer to the centre of the town. They're made from a cold, pale grey stone. There are a few stalls in the vicinity, a man with a quest catches your eye.",
 			"n": "To your north are the walls of this town, they're strong and old. You wonder what they were built to keep out.",
 			"e": "Looking to your east there's a narrow alley way. It leads away from the busy streets.",
 			"s": "To the south is the centre of town, it's busy and loud.",
 			"w": "To the west is the back gate of Gwynhaven. You think back to when you first caught glimpse of the wooden barricades through the trees.",
 			"requireditems": [], 
 			"passable": true,
-			"quests" : [],
+			"quests" : [0],
 			"items" : []
 		},
 		{
@@ -55,7 +55,7 @@
 			"s": "The south is impassable, once again the black has caught up to you.",
 			"w": "Turning to the west you see the face of the void, it stares back.",
 			"requireditems": ["cut"],
-			"passable": true,
+			"passable": false,
 			"quests" : [],
 			"items" : []
 		},
@@ -69,7 +69,7 @@
 			"s": "The south sees the world fall away into black, you turn away.",
 			"w": "Turning to the west you see the forest continue.",
 			"requireditems": ["cut"],
-			"passable": true,
+			"passable": false,
 			"quests" : [],
 			"items" : []
 		},
