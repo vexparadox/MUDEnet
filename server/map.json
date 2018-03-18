@@ -35,7 +35,7 @@
 			"id": 2,
 			"title": "Gwynhaven - Narrow alley",
 			"description": "A narrow alley way that connects the town square with .",
-			"here": "The buildings tower over you, it's noticeably colder here. There's some beggars sleeping in doorways, they don't seem to be aware of you.",
+			"here": "The buildings tower over you, it's noticeably colder here. There's some beggars sleeping in doorways, they don't seem to be aware of you. There's a stick[0] on the wall.",
 			"n": "The north is blocked by buildings.",
 			"e": "The east carries a sense excitment, you can see the town thinning and the walls beyond.",
 			"s": "The south is blocked by buildings.",
@@ -43,7 +43,7 @@
 			"requireditems": [],
 			"passable": true,
 			"quests" : [],
-			"items" : []
+			"items" : [0]
 		},
 		{
 			"id": 3,

@@ -10,7 +10,7 @@
 			"item_rewards": [],
 			"cash_reward": 200,
 			"required_items" : [0],
-			"required_location" : 0
+			"required_location" : 1
 		}
 	]
 }

@@ -68,3 +68,5 @@ void mud_go(ENetEvent* event, std::vector<std::string>);
 void mud_help(ENetEvent* event, std::vector<std::string>);
 void mud_inv(ENetEvent* event, std::vector<std::string>);
 void mud_quests(ENetEvent* event, std::vector<std::string>);
+void mud_pickup(ENetEvent* event, std::vector<std::string>);
+

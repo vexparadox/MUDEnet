@@ -39,6 +39,7 @@ int main(int argc, char const *argv[])
     mud_actions.push_back(std::make_pair("go", mud_go));
     mud_actions.push_back(std::make_pair("help", mud_help));
     mud_actions.push_back(std::make_pair("inv", mud_inv));
+    mud_actions.push_back(std::make_pair("pickup", mud_pickup));
     mud_actions.push_back(std::make_pair("quest", mud_quests));
 
     std::cout << "Server was started on " << argv[1] << ":" << argv[2] << std::endl;
@@ -492,6 +493,7 @@ void mud_help(ENetEvent* event, std::vector<std::string>)
     ss << "say <message>                    -  Speak to the people at your location" << "\n";
     ss << "quest <list/accept/abandon/complete> (id) -  List/accept/abandon/complete quests" << "\n";
     ss << "inv                              -  Check your inventory" << "\n";
+    ss << "pickup <id>                      -  Pickup an item" << "\n";
     ss << "exit                             -  Logout";
 
     message_peer(event->peer, ss.str());
@@ -635,5 +637,40 @@ void mud_quests(ENetEvent* event, std::vector<std::string> tokens)
             }
         }
         message_peer(event->peer, ss.str());
+    }
+}
+
+void mud_pickup(ENetEvent* event, std::vector<std::string> tokens)
+{
+    if(tokens.size() < 2)
+    {
+        message_peer(event->peer, "This action needs parameters, try using help!");
+        return;
+    }
+    
+    //get the 2nd argument as an int
+    std::istringstream int_ss(tokens.at(1));
+    if(int_ss.fail())
+    {
+        message_peer(event->peer, "That wasn't an ID! Try giving numbers");
+        return;
+    }
+    int item_id;
+    int_ss >> item_id;
+    std::stringstream ss;
+
+    ClientState* client = client_manager.client_for_id(event->peer->data);
+    if(client)
+    {
+        for(int available_item_id : world_state.location(client->location_id()).m_available_items)
+        {
+            if(available_item_id == item_id)
+            {
+                client->inventory().gain_item(item_id);
+                message_peer(event->peer, "You picked up the item.\n");
+                return;
+            }
+        }
+        message_peer(event->peer, "That item isn't available here.\n");
     }
 }

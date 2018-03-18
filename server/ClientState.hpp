@@ -30,6 +30,7 @@ public:
 	void save(json&) const;
 
 	const Inventory& inventory() const { return m_inventory; }
+	Inventory& inventory() { return m_inventory; }
 	const std::string& username() const { return m_username; }
 	const std::string& password() const { return m_password; }
 	std::string quest_status_string(const QuestManager&, bool all_quests) const;
