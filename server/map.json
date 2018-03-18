@@ -14,7 +14,7 @@
 			"w": "To the west, the town walls tower over you. They're simple but effective.",
 			"requireditems": [],
 			"passable": true,
-			"quests" : [1],
+			"quests" : [0],
 			"items" : []
 		},
 		{

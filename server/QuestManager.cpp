@@ -1,4 +1,6 @@
 #include "QuestManager.hpp"
+#include "ClientState.hpp"
+#include "WorldState.hpp"
 #include <fstream>
 #include <iostream>
 using json = nlohmann::json;
@@ -32,4 +34,29 @@ Quest* QuestManager::quest_for_id(int id) const
 		return found_quest->second;
 	}
 	return nullptr;
+}
+
+QUEST_COMPLETION_STATUS QuestManager::completion_status(const Quest& quest, const ClientState* client, const Location& location) const
+{
+	if(client == nullptr)
+	{
+		return QUEST_COMPLETION_STATUS::UNKNOWN;
+	}
+
+	if(location.m_id != quest.required_location())
+	{
+		return QUEST_COMPLETION_STATUS::BAD_LOCATION;
+	}
+
+	const bool has_items = std::all_of(quest.required_items().begin(), quest.required_items().end(), [client](int item_id)
+	{
+		return client->inventory().has_item(item_id);
+	});
+
+	if(has_items == false)
+	{
+		return QUEST_COMPLETION_STATUS::MISSING_ITEMS;
+	}
+
+	return QUEST_COMPLETION_STATUS::COMPLETE;
 }

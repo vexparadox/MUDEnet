@@ -38,3 +38,28 @@ std::string Inventory::print_string(const ItemManager& item_manager) const
 	}
 	return ss.str();
 }
+
+void Inventory::gain_item(const Item& item)
+{
+	gain_item(item.ID());
+}
+
+void Inventory::lose_item(int item_id)
+{
+	m_item_ids.erase(std::remove(m_item_ids.begin(), m_item_ids.end(), item_id), m_item_ids.end());
+}
+
+void Inventory::lose_item(const Item& item)
+{
+	lose_item(item.ID());
+}
+
+bool Inventory::has_item(int item_id) const
+{
+	return std::find(m_item_ids.begin(), m_item_ids.end(), item_id) != m_item_ids.end();
+}
+
+bool Inventory::has_item(const Item& item) const
+{
+	return has_item(item.ID());
+}

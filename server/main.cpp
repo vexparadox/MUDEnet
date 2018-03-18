@@ -598,6 +598,41 @@ void mud_quests(ENetEvent* event, std::vector<std::string> tokens)
                     ss << "You're not currently on that quest.\n";
                 }
             }
+            else if(tokens.at(1) == "complete")
+            {
+                Quest* quest = quest_manager.quest_for_id(quest_id);
+                if(quest && client->has_active_quest(*quest))
+                {
+                    switch(quest_manager.completion_status(*quest, client, world_state.location(client->location_id())))
+                    {
+                        case QUEST_COMPLETION_STATUS::COMPLETE:
+                        {
+                            client->complete_quest(*quest);
+                            ss << quest->complete_string() << "\n";
+                            break;
+                        }
+                        case QUEST_COMPLETION_STATUS::MISSING_ITEMS:
+                        {
+                            ss << "You're missing a required item to complete that quest.\n";
+                            break;
+                        }
+                        case QUEST_COMPLETION_STATUS::BAD_LOCATION:
+                        {
+                            ss << "You're not in the right place to complete that quest.\n";
+                            break;
+                        }
+                        default:
+                        {
+                            ss << "Unknown issue, see admin.\n";
+                            break;
+                        }
+                    }
+                }
+                else
+                {
+                    ss << "You're not currently on that quest.\n";
+                }
+            }
         }
         message_peer(event->peer, ss.str());
     }

@@ -32,6 +32,24 @@ void ClientState::save(json& client_obj) const
     client_obj["completed_quests"] = m_completed_quests;
 }
 
+void ClientState::complete_quest(const Quest& quest)
+{
+    //we can use abandon as it actually just removes from the active list
+    abandon_quest(quest);
+    m_completed_quests.push_back(quest.ID());
+    m_inventory.gain_cash(quest.cash_reward());
+    for(int item_id : quest.item_rewards())
+    {
+        m_inventory.gain_item(item_id);
+    }
+
+    //you have to lose the item?
+    for(int item_id : quest.required_items())
+    {
+        m_inventory.lose_item(item_id);
+    }
+}
+
 bool ClientState::has_completed_quest(int quest_id) const
 {
     return std::find(m_completed_quests.begin(), m_completed_quests.end(), quest_id) != m_completed_quests.end();

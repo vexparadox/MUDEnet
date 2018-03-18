@@ -3,21 +3,14 @@
 	[
 		{
 			"id": 0,
-			"title": "Test",
-			"description": "A test quest!",
-			"accept" : "Thank you so much!",
-			"complete": "Wow you did it!",
-			"item_rewards": [0],
-			"cash_reward": 20
-		},
-		{
-			"id": 1,
 			"title": "Sticks",
 			"description": "A trader in Gwynhaven needs some sticks!",
 			"accept" : "Find a stick!",
-			"complete": "Wow you did it!",
-			"item_rewards": [0],
-			"cash_reward": 20
+			"complete": "Wow you did it! Here have some cash.",
+			"item_rewards": [],
+			"cash_reward": 20,
+			"required_items" : [0],
+			"required_location" : 0
 		}
 	]
 }
