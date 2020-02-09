@@ -278,9 +278,10 @@ void message_recieved(ENetEvent* event)
         return;
     }
 
+    stream.skip_forwards(1);
     //Ha! I love C++
     std::vector<std::string> tokens;
-    std::string input((char*)event->packet->data+2);
+    std::string input((char*)stream.head());
     std::stringstream ss(input);
     std::string buffer;
     while(ss >> buffer)

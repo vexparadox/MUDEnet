@@ -33,6 +33,8 @@ public:
 
 	const Byte* data() const { return m_data; }
 
+	const Byte* head() const { return m_head; }
+
 	size_t size() { return m_data_size; }
 
 	void dump()
