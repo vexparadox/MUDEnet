@@ -105,7 +105,7 @@ void getUsername()
     //copy the username to the buffer
     stream.write(Byte(1)); // set this to a 1, means a new user
 	stream.write(Byte(CLIENT_VERSION)); // Write the client version
-	stream.write(username_buffer, 510);
+	stream.write(username_buffer, USERNAME_SIZE);
     stream.write(md5_password);
     ENetPacket* packet = enet_packet_create (stream.data(), stream.size(), ENET_PACKET_FLAG_RELIABLE);
     enet_peer_send (server.load(), 0, packet);         
