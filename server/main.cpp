@@ -94,7 +94,7 @@ void take_input()
 {
     char buffer[510];
     while (run.load()){
-        DataStream stream(1024);
+        DataStream stream(MSG_BUFFER_SIZE);
         memset(buffer, 0, 510);
         fgets(buffer, 510, stdin);
         //get rid of that pesky \n
@@ -154,7 +154,7 @@ void notify_exit()
 //broadcast to all players in the server
 void send_broadcast(const std::string& message)
 {
-    DataStream broadcast_stream(1024);
+    DataStream broadcast_stream(MSG_BUFFER_SIZE);
     broadcast_stream.write(Byte(0));
     broadcast_stream.write(Byte(255));
     broadcast_stream.write(message);
@@ -186,7 +186,7 @@ void user_disconnected(ENetEvent* event)
 //We check for a matching client state or create a new one for this user
 void new_user(ENetEvent* event)
 {
-    DataStream event_stream((Byte*)event->packet->data, 1024);
+    DataStream event_stream((Byte*)event->packet->data, MSG_BUFFER_SIZE);
     event_stream.skip_forwards(1); // skip the first byte
     
     //get the client version
@@ -201,11 +201,10 @@ void new_user(ENetEvent* event)
         return;
     }
 
-    //TODO this is really hacky.. but it works?
     //get the username out of the event
-    const std::string event_username(event_stream.read<char>());
-    event_stream.jump_to(512); //jump to the end of the username
-    const std::string md5_password(event_stream.read<char>()); // read out the password
+    const std::string event_username = event_stream.string(USERNAME_SIZE);
+    // read out the password
+    const std::string md5_password = event_stream.string(PASSWORD_SIZE); 
 
     //check if we already have a user of that name
     ClientState* client_ptr = client_manager.client_for_username(event_username);
@@ -244,7 +243,7 @@ void new_user(ENetEvent* event)
     client_ptr->set_enet_peer(event->peer);
 
     //prep a stream to send back to the new user with their unique ID
-    DataStream stream(1024);
+    DataStream stream(MSG_BUFFER_SIZE);
     stream.write(Byte(1));
     //write the client's ID to the stream so they can save it and use it later
     stream.write((char)client_ptr->ID());
@@ -310,7 +309,7 @@ void message_peer(ENetPeer* peer, const std::string& str)
 {
     //sends the string given to the peer passed
     //sends as a message from the server to the client, the client should just print this
-    DataStream stream(1024);
+    DataStream stream(MSG_BUFFER_SIZE);
     stream.write(Byte(0)); // Server to client message
     stream.write(Byte(255));
     stream.write(str);

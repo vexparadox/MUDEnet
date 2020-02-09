@@ -78,6 +78,19 @@ public:
 		return false;
 	}
 
+	std::string string(size_t size)
+	{
+		std::string str;
+		if(m_head+size <= m_data+m_data_size)
+		{
+			str = std::string((char*)(m_head), size);
+			m_head += size;
+			return str;
+		}
+		std::cout << "Attempt to read invalid memory size to data stream" << std::endl;
+		return str;
+	}
+
 	template <typename T>
 	bool read(T& t)
 	{

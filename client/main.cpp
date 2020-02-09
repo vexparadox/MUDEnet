@@ -80,23 +80,23 @@ int main(int argc, char const *argv[])
 void getUsername()
 {
     std::cout << "Giving a new username will create a new account, using an existing one with the correct password will log you back in." << std::endl; 
-    char username_buffer[510];
-    memset(username_buffer, 0, 510);
-	DataStream stream(1024);
+    char username_buffer[USERNAME_SIZE];
+    memset(username_buffer, 0, USERNAME_SIZE);
+	DataStream stream(MSG_BUFFER_SIZE);
     do{
         printf("Username: ");
-        fgets(username_buffer, 510, stdin);
+        fgets(username_buffer, USERNAME_SIZE, stdin);
     }while(strlen(username_buffer) <= 1);
 
     char* temp = username_buffer+strlen(username_buffer)-1; // remove the \n
     *temp = '\0';
 
-    char password_buffer[510];
-    memset(password_buffer, 0, 510);
+    char password_buffer[PASSWORD_SIZE];
+    memset(password_buffer, 0, PASSWORD_SIZE);
     std::cout << "Please note: passwords are stored and sent as MD5, this is NOT secure! They are not human readable but please don't use real passwords!" << std::endl;
     do{
         printf("Password: ");
-        fgets(password_buffer, 510, stdin);
+        fgets(password_buffer, PASSWORD_SIZE, stdin);
     }while(strlen(password_buffer) <= 1);
 
     MD5 converter;
@@ -116,13 +116,15 @@ void getUsername()
 void takeInput()
 {
     DataStream stream(MSG_BUFFER_SIZE);
-	char buffer[MSG_BUFFER_SIZE-2]; // first 2 bytes are for parameters
+    // first 2 bytes are for parameters
+    const int message_size = MSG_BUFFER_SIZE-2;
+	char buffer[message_size]; 
     while (running.load()){
         //clear the buffer and message
         stream.clear_data();
-        memset(buffer, 0, 1022);
+        memset(buffer, 0, message_size);
         //get the buffer
-        fgets(buffer, 1022, stdin);
+        fgets(buffer, message_size, stdin);
         //get rid of that pesky \n
         char* temp = buffer+strlen(buffer)-1;
         *temp = '\0';
@@ -133,7 +135,7 @@ void takeInput()
             if(strcmp(buffer, "exit") == 0){
         		running.store(false);
         	}else{
-				stream.write(buffer, 1022);
+				stream.write(buffer, message_size);
         	    ENetPacket* packet = enet_packet_create (stream.data(), stream.size(), ENET_PACKET_FLAG_RELIABLE);
 			    enet_peer_send (server.load(), 0, packet);         
 			    enet_host_flush (client.load());
@@ -146,8 +148,9 @@ void takeInput()
 
 void messageRecieved(ENetEvent* event){
     //print the packet
-	DataStream stream(event->packet->data, 1024);
-    printf ("%s\n", stream.data()+2);
+	DataStream stream(event->packet->data, MSG_BUFFER_SIZE);
+    stream.skip_forwards(2);
+    printf ("%s\n", stream.string(MSG_BUFFER_SIZE-2).c_str());
     enet_packet_destroy (event->packet);
 }
 
@@ -174,7 +177,7 @@ void serverClosed(ENetEvent* event)
 
 //occurs when new clients connect to the server
 void uniqueID(ENetEvent* event){
-    DataStream stream((Byte*)event->packet->data, 1024);
+    DataStream stream((Byte*)event->packet->data, MSG_BUFFER_SIZE);
     stream.skip_forwards(1); // jump the first byte
     stream.read(current_user_id); // save the new user ID for later use
     enet_packet_destroy (event->packet);
