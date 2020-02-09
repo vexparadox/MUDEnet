@@ -345,22 +345,11 @@ void mud_look(ENetEvent* event, std::vector<std::string> tokens)
     }
     else
     {
-        std::string& param1 = tokens.at(1);
-        if(param1 == "n" || param1 == "north")
+        const std::string& param1 = tokens.at(1);
+        const DIRECTION direction = direction_for_string(param1);
+        if(direction != DIRECTION::NUM)
         {
-            ss << client_loc.m_north;
-        }
-        else if(param1 == "e" || param1 == "east")
-        {
-            ss << client_loc.m_east;
-        }
-        else if(param1 == "s" || param1 == "south")
-        {
-            ss << client_loc.m_south;
-        }
-        else if(param1 == "w" || param1 == "west")
-        {
-            ss << client_loc.m_west;
+            ss << client_loc.direction_string(direction);
         }
         else
         {

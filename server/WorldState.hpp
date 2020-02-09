@@ -1,11 +1,23 @@
 #pragma once
 #include <string>
 #include <vector>
+#include <array>
 #include "../shared/json.hpp"
 
 class ClientState;
 
 using json = nlohmann::json;
+
+enum DIRECTION : char
+{
+	NORTH,
+	EAST,
+	SOUTH,
+	WEST,
+	NUM
+};
+
+DIRECTION direction_for_string(const std::string&);
 
 struct Location
 {
@@ -13,17 +25,15 @@ struct Location
 	std::string m_title;
 	std::string m_description;
 	std::string m_here;
-	std::string m_north;
-	std::string m_east;
-	std::string m_south;
-	std::string m_west;
 	std::vector<std::string> m_required_items;
 	std::vector<int> m_available_quests;
 	std::vector<int> m_available_items;
+	std::array<std::string, DIRECTION::NUM> m_direction_descriptions;
 	bool m_passable;
 	Location(json&);
 	std::vector<int> available_quests(ClientState*) const;
 	bool is_quest_available(ClientState*, int quest_id) const;
+	const std::string& direction_string(DIRECTION direction) const;
 	bool IsPassable(ClientState*) const;
 };
 
