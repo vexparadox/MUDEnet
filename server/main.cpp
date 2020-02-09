@@ -92,11 +92,12 @@ int main(int argc, char const *argv[])
 
 void take_input()
 {
-    char buffer[510];
+    const int message_content_size = MSG_BUFFER_SIZE-2;
+    char buffer[message_content_size];
     while (run.load()){
         DataStream stream(MSG_BUFFER_SIZE);
-        memset(buffer, 0, 510);
-        fgets(buffer, 510, stdin);
+        memset(buffer, 0, message_content_size);
+        fgets(buffer, message_content_size, stdin);
         //get rid of that pesky \n
         char* temp = buffer+strlen(buffer)-1;
         *temp = '\0';
@@ -129,7 +130,7 @@ void take_input()
             }
             else
             {
-                stream.write(buffer, 510);
+                stream.write(buffer, message_content_size);
         	    ENetPacket* packet = enet_packet_create (stream.data(), stream.size(), ENET_PACKET_FLAG_RELIABLE);
 			    enet_host_broadcast (host.load(), 0, packet);         
 			    enet_host_flush (host.load());	
@@ -279,8 +280,7 @@ void message_recieved(ENetEvent* event)
 
     //Ha! I love C++
     std::vector<std::string> tokens;
-    std::string input((char*)stream.head());
-    std::stringstream ss(input);
+    std::stringstream ss(stream.string(MSG_BUFFER_SIZE-2));
     std::string buffer;
     while(ss >> buffer)
     {
