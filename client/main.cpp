@@ -1,4 +1,4 @@
-#include "main.hpp"
+ #include "main.hpp"
 int main(int argc, char const *argv[])
 {
 	running.store(true);
@@ -115,8 +115,8 @@ void getUsername()
 
 void takeInput()
 {
-    DataStream stream(1024);
-	char buffer[1022];
+    DataStream stream(MSG_BUFFER_SIZE);
+	char buffer[MSG_BUFFER_SIZE-2]; // first 2 bytes are for parameters
     while (running.load()){
         //clear the buffer and message
         stream.clear_data();

@@ -1,4 +1,5 @@
 #pragma once
+#include "../shared/Config.hpp"
 #include "ClientState.hpp"
 #include "WorldState.hpp"
 #include "ClientManager.hpp"

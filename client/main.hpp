@@ -1,5 +1,6 @@
 #pragma once
 #include <enet/enet.h>
+#include "../shared/Config.hpp"
 #include "../shared/DataStream.hpp"
 #include "../shared/md5.hpp"
 #include <stdio.h>

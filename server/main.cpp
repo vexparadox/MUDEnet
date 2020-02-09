@@ -267,7 +267,7 @@ void new_user(ENetEvent* event)
 void message_recieved(ENetEvent* event)
 {
     //verify the UserID first!
-    DataStream stream((Byte*)event->packet->data, 2);
+    DataStream stream((Byte*)event->packet->data, MSG_BUFFER_SIZE);
     stream.skip_forwards(1);
     ClientState* client_state = client_manager.client_for_id(event->peer->data);
     char id;
@@ -278,7 +278,6 @@ void message_recieved(ENetEvent* event)
         return;
     }
 
-    stream.skip_forwards(1);
     //Ha! I love C++
     std::vector<std::string> tokens;
     std::string input((char*)stream.head());
