@@ -1,0 +1,81 @@
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+<script>
+var map;
+function dispFile(contents) {
+	map = JSON.parse(contents)
+  	$('#welcome_text').val(map.welcome_text)
+  	$('#width').val(map.width)
+  	$('#height').val(map.height)
+  	map.worldmap.forEach(function(tile)
+  	{
+		var tile_element = $('.map_tile').clone().insertBefore(".end");
+  		tile_element.find('#title').val(tile.title)
+  	})
+}
+function clickElem(elem) {
+	// Thx user1601638 on Stack Overflow (6/6/2018 - https://stackoverflow.com/questions/13405129/javascript-create-and-save-file )
+	var eventMouse = document.createEvent("MouseEvents")
+	eventMouse.initMouseEvent("click", true, false, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null)
+	elem.dispatchEvent(eventMouse)
+}
+function openFile(func) {
+	readFile = function(e) {
+		var file = e.target.files[0];
+		if (!file) {
+			return;
+		}
+		var reader = new FileReader();
+		reader.onload = function(e) {
+			var contents = e.target.result;
+			fileInput.func(contents)
+			document.body.removeChild(fileInput)
+		}
+		reader.readAsText(file)
+	}
+	fileInput = document.createElement("input")
+	fileInput.type='file'
+	fileInput.style.display='none'
+	fileInput.onchange=readFile
+	fileInput.func=func
+	document.body.appendChild(fileInput)
+	clickElem(fileInput)
+}
+
+var saveFile = (function () {
+    var a = document.createElement("a");
+    document.body.appendChild(a);
+    a.style = "display: none";
+    return function (data, fileName) {
+        var json = JSON.stringify(data),
+            blob = new Blob([json], {type: "octet/stream"}),
+            url = window.URL.createObjectURL(blob);
+        a.href = url;
+        a.download = fileName;
+        a.click();
+        window.URL.revokeObjectURL(url);
+    };
+}());
+</script>
+<!DOCTYPE html>
+<html>
+<head>
+	<title>World Generation</title>
+</head>
+<body>
+	<h1> World Generation</h1>
+	<button onclick="openFile(dispFile)">Open a file</button>
+	<input type="text" size="100" id="welcome_text"/><br />
+	<input type="number" size="10" id="width"/><br />
+	<input type="number" size="10" id="height"/><br />
+	<div class="map_tile">
+		Title: <input type="text" size="50" id="title" value=""/><br />
+		Description: <input type="text" size="100" id="description"/><br />
+		Here: <input type="text" size="100" id="here"/><br />
+		North: <input type="text" size="100" id="north"/><br />
+		East: <input type="text" size="100" id="east"/><br />
+		South: <input type="text" size="100" id="south"/><br />
+		West<input type="text" size="100" id="west"/><br />
+	</div>
+	<div class="end"/>
+</body>
+</html>
