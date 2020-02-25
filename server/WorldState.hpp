@@ -37,7 +37,6 @@ struct Location
 	bool IsPassable(ClientState*) const;
 };
 
-// I'm a naughty boi boi
 class WorldState
 {
 	std::vector<Location> m_locations;

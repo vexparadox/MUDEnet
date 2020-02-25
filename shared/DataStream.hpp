@@ -37,6 +37,8 @@ public:
 
 	size_t size() { return m_data_size; }
 
+	std::ptrdiff_t size_used() { return m_head - m_data; }
+
 	void dump()
 	{
 		for(int i = 0; i < m_data_size; i++)
@@ -78,17 +80,14 @@ public:
 		return false;
 	}
 
-	std::string string(size_t size)
+	std::string string()
 	{
-		std::string str;
-		if(m_head+size <= m_data+m_data_size)
+		std::pair<const char*, size_t> char_buffer = read<const char>();
+		if(char_buffer.first)
 		{
-			str = std::string((char*)(m_head), size);
-			m_head += size;
-			return str;
+			return std::string(char_buffer.first, char_buffer.second);
 		}
-		std::cout << "Attempt to read invalid memory size to data stream" << std::endl;
-		return str;
+		return std::string();
 	}
 
 	template <typename T>
@@ -100,21 +99,23 @@ public:
 			m_head += sizeof(t);
 			return true;
 		}
-		std::cout << "Attempt to read invalid memory size to data stream" << std::endl;
+		std::cout << "Attempt to read invalid memory size to data stream using variable access." << std::endl;
 		return false;
 	}
 
 	template <typename T>
-	T* read()
+	std::pair<T*, size_t> read()
 	{
-		if(m_head+sizeof(T) <= m_data+m_data_size)
+		size_t buffer_size = 0;
+		read(buffer_size);
+		if(m_head+buffer_size <= m_data+m_data_size)
 		{
 			T* t = (T*)m_head;
-			m_head += sizeof(t);
-			return t;
+			m_head += buffer_size;
+			return std::make_pair(t, buffer_size);
 		}
-		std::cout << "Attempt to read invalid memory size to data stream" << std::endl;
-		return nullptr;
+		std::cout << "Attempt to read invalid memory size out of a data stream using buffer access." << std::endl;
+		return std::make_pair(nullptr, 0);
 	}
 
 	bool write(const std::string& str)
@@ -122,20 +123,19 @@ public:
 		return write(str.c_str(), str.size());
 	}
 
+	//writing a buffer is a special case where we always prefix with the size
 	template <typename T>
-	bool write(const T* t, size_t size = 0)
+	bool write(const T* t, size_t size)
 	{
-		if(size == 0)
+		//check we can fit the buffer and the size identifier
+		if(m_head+size+sizeof(size) <= m_data+m_data_size)
 		{
-			size = sizeof(*t);
-		}
-		if(m_head+size <= m_data+m_data_size)
-		{
+			write(size); // write the size of the buffer
 			memcpy((char*)m_head, t, size);
 			m_head += size;
 			return true;
 		}
-		std::cout << "Attempt to write invalid memory size to data stream" << std::endl;
+		std::cout << "Attempt to write invalid memory size to data stream using buffer access." << std::endl;
 		return false;
 	}
 

@@ -92,11 +92,11 @@ int main(int argc, char const *argv[])
 
 void take_input()
 {
-    const int message_content_size = MSG_BUFFER_SIZE-2;
+    // todo: please fix this mad maths, maybe pre-alloc the buffer?
+    const int message_content_size = MSG_BUFFER_SIZE-2-sizeof(size_t);
     char buffer[message_content_size];
     while (run.load()){
         DataStream stream(MSG_BUFFER_SIZE);
-        memset(buffer, 0, message_content_size);
         fgets(buffer, message_content_size, stdin);
         //get rid of that pesky \n
         char* temp = buffer+strlen(buffer)-1;
@@ -130,13 +130,13 @@ void take_input()
             }
             else
             {
-                stream.write(buffer, message_content_size);
+                stream.write(buffer, std::strlen(buffer));
         	    ENetPacket* packet = enet_packet_create (stream.data(), stream.size(), ENET_PACKET_FLAG_RELIABLE);
 			    enet_host_broadcast (host.load(), 0, packet);         
 			    enet_host_flush (host.load());	
 			    printf("\033[1A"); //go up one line
 			    printf("\033[K"); //delete to the end of the line
-			    printf("\rServer: %s\n", stream.data()+2); // use \r to get back to the start and print
+			    printf("\rServer: %s\n", buffer); // use \r to get back to the start and print
         	}
         }
 
@@ -203,9 +203,9 @@ void new_user(ENetEvent* event)
     }
 
     //get the username out of the event
-    const std::string event_username = event_stream.string(USERNAME_SIZE);
+    const std::string event_username = event_stream.string();
     // read out the password
-    const std::string md5_password = event_stream.string(PASSWORD_SIZE); 
+    const std::string md5_password = event_stream.string(); 
 
     //check if we already have a user of that name
     ClientState* client_ptr = client_manager.client_for_username(event_username);
@@ -280,7 +280,7 @@ void message_recieved(ENetEvent* event)
 
     //Ha! I love C++
     std::vector<std::string> tokens;
-    std::stringstream ss(stream.string(MSG_BUFFER_SIZE-2));
+    std::stringstream ss(stream.string());
     std::string buffer;
     while(ss >> buffer)
     {

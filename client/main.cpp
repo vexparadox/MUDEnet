@@ -105,7 +105,7 @@ void getUsername()
     //copy the username to the buffer
     stream.write(Byte(1)); // set this to a 1, means a new user
 	stream.write(Byte(CLIENT_VERSION)); // Write the client version
-	stream.write(username_buffer, USERNAME_SIZE);
+	stream.write(username_buffer, std::strlen(username_buffer));
     stream.write(md5_password);
     ENetPacket* packet = enet_packet_create (stream.data(), stream.size(), ENET_PACKET_FLAG_RELIABLE);
     enet_peer_send (server.load(), 0, packet);         
@@ -117,7 +117,9 @@ void takeInput()
 {
     DataStream stream(MSG_BUFFER_SIZE);
     // first 2 bytes are for parameters
-    const int message_size = MSG_BUFFER_SIZE-2;
+    // we also preappend string length
+    // todo: please fix this mad maths, maybe pre-alloc the buffer?
+    const int message_size = MSG_BUFFER_SIZE-2-sizeof(size_t);
 	char buffer[message_size]; 
     while (running.load()){
         //clear the buffer and message
@@ -129,18 +131,18 @@ void takeInput()
         char* temp = buffer+strlen(buffer)-1;
         *temp = '\0';
         //set the params of the message
-		stream.write(Byte(0));
-		stream.write(current_user_id);
         if(strcmp(buffer, "") != 0){
             if(strcmp(buffer, "exit") == 0){
         		running.store(false);
         	}else{
-				stream.write(buffer, message_size);
+                stream.write(Byte(0));
+                stream.write(current_user_id);
+				stream.write(buffer, std::strlen(buffer)); //we write out the size of the string because we need to know the true size later
         	    ENetPacket* packet = enet_packet_create (stream.data(), stream.size(), ENET_PACKET_FLAG_RELIABLE);
 			    enet_peer_send (server.load(), 0, packet);         
 			    enet_host_flush (client.load());
 			    printf("\033[1A"); //go up one line
-			    printf("\033[K"); //delete to the end of the line	
+			    printf("\033[K"); //delete to the end of the line
         	}
         }
     }
@@ -150,7 +152,7 @@ void messageRecieved(ENetEvent* event){
     //print the packet
 	DataStream stream(event->packet->data, MSG_BUFFER_SIZE);
     stream.skip_forwards(2);
-    printf ("%s\n", stream.string(MSG_BUFFER_SIZE-2).c_str());
+    printf ("%s\n", stream.string().c_str());
     enet_packet_destroy (event->packet);
 }
 
