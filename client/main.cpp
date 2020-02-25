@@ -105,7 +105,7 @@ void getUsername()
     //copy the username to the buffer
     stream.write(Byte(1)); // set this to a 1, means a new user
 	stream.write(Byte(CLIENT_VERSION)); // Write the client version
-	stream.write(username_buffer, std::strlen(username_buffer));
+	stream.write_buffer(username_buffer, std::strlen(username_buffer));
     stream.write(md5_password);
     ENetPacket* packet = enet_packet_create (stream.data(), stream.size(), ENET_PACKET_FLAG_RELIABLE);
     enet_peer_send (server.load(), 0, packet);         
@@ -137,7 +137,7 @@ void takeInput()
         	}else{
                 stream.write(Byte(0));
                 stream.write(current_user_id);
-				stream.write(buffer, std::strlen(buffer)); //we write out the size of the string because we need to know the true size later
+				stream.write_buffer(buffer, std::strlen(buffer)); //we write out the size of the string because we need to know the true size later
         	    ENetPacket* packet = enet_packet_create (stream.data(), stream.size(), ENET_PACKET_FLAG_RELIABLE);
 			    enet_peer_send (server.load(), 0, packet);         
 			    enet_host_flush (client.load());

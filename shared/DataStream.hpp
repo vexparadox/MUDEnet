@@ -82,7 +82,7 @@ public:
 
 	std::string string()
 	{
-		std::pair<const char*, size_t> char_buffer = read<const char>();
+		std::pair<const char*, size_t> char_buffer = read_buffer<const char>();
 		if(char_buffer.first)
 		{
 			return std::string(char_buffer.first, char_buffer.second);
@@ -104,7 +104,7 @@ public:
 	}
 
 	template <typename T>
-	std::pair<T*, size_t> read()
+	std::pair<T*, size_t> read_buffer()
 	{
 		size_t buffer_size = 0;
 		read(buffer_size);
@@ -120,12 +120,12 @@ public:
 
 	bool write(const std::string& str)
 	{
-		return write(str.c_str(), str.size());
+		return write_buffer(str.c_str(), str.size());
 	}
 
 	//writing a buffer is a special case where we always prefix with the size
 	template <typename T>
-	bool write(const T* t, size_t size)
+	bool write_buffer(const T* t, size_t size)
 	{
 		//check we can fit the buffer and the size identifier
 		if(m_head+size+sizeof(size) <= m_data+m_data_size)

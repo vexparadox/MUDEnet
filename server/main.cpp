@@ -130,7 +130,7 @@ void take_input()
             }
             else
             {
-                stream.write(buffer, std::strlen(buffer));
+                stream.write_buffer(buffer, std::strlen(buffer));
         	    ENetPacket* packet = enet_packet_create (stream.data(), stream.size(), ENET_PACKET_FLAG_RELIABLE);
 			    enet_host_broadcast (host.load(), 0, packet);         
 			    enet_host_flush (host.load());	
