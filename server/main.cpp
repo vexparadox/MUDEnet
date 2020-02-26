@@ -400,69 +400,80 @@ void mud_go(ENetEvent* event, std::vector<std::string> tokens)
     {
         const std::string invalid_direction = "You can't go in that direction";
         std::string response;
-        std::string& param1 = tokens.at(1);
-        if(param1 == "n" || param1 == "north")
+        switch(direction_for_string(tokens.at(1)))
         {
-            if(client->location_id() < world_state.width())
+            case DIRECTION::NORTH:
+            {
+                if(client->location_id() < world_state.width())
+                {
+                    response = invalid_direction;
+                }
+                else if (world_state.location(client->location_id()-world_state.width()).IsPassable(client) == false)
+                {
+                    response = "That region is impassable.";
+                }
+                else
+                {
+                    client->set_location(client->location_id()-world_state.width());
+                    response = "You travel north.";
+                }
+                break;
+            }
+            case DIRECTION::EAST:
+            {
+                if((client->location_id()+1) % world_state.width() == 0)
+                {
+                    response = invalid_direction;
+                }
+                else if (world_state.location(client->location_id()+1).IsPassable(client) == false)
+                {
+                    response = "That region is impassable.";
+                }
+                else
+                {
+                    client->set_location(client->location_id()+1);
+                    response = "You travel east.";
+                }
+                break;
+            }
+            case DIRECTION::SOUTH:
+            {
+                if((client->location_id() / world_state.height()) >= world_state.height())
+                {
+                    response = invalid_direction;
+                }
+                else if (world_state.location(client->location_id()+world_state.width()).IsPassable(client) == false)
+                {
+                    response = "That region is impassable.";
+                }
+                else
+                {
+                    client->set_location(client->location_id()+world_state.width());
+                    response = "You travel south.";
+                }
+                break;
+            }
+            case DIRECTION::WEST:
+            {
+                if(client->location_id() % world_state.width() == 0)
+                {
+                    response = invalid_direction;
+                }
+                else if (world_state.location(client->location_id()-1).IsPassable(client) == false)
+                {
+                    response = "That region is impassable.";
+                }
+                else
+                {
+                    client->set_location(client->location_id()-1);
+                    response = "You travel west.";
+                }
+                break;
+            }
+            default:
             {
                 response = invalid_direction;
-            }
-            else if (world_state.location(client->location_id()-world_state.width()).IsPassable(client) == false)
-            {
-                response = "That region is impassable.";
-            }
-            else
-            {
-                client->set_location(client->location_id()-world_state.width());
-                response = "You travel north.";
-            }
-        }
-        else if(param1 == "e" || param1 == "east")
-        {
-            if((client->location_id()+1) % world_state.width() == 0)
-            {
-                response = invalid_direction;
-            }
-            else if (world_state.location(client->location_id()+1).IsPassable(client) == false)
-            {
-                response = "That region is impassable.";
-            }
-            else
-            {
-                client->set_location(client->location_id()+1);
-                response = "You travel east.";
-            }
-        }
-        else if(param1 == "s" || param1 == "south")
-        {
-            if((client->location_id() / world_state.height()) >= world_state.height())
-            {
-                response = invalid_direction;
-            }
-            else if (world_state.location(client->location_id()+world_state.width()).IsPassable(client) == false)
-            {
-                response = "That region is impassable.";
-            }
-            else
-            {
-                client->set_location(client->location_id()+world_state.width());
-                response = "You travel south.";
-            }
-        }
-        else if(param1 == "w" || param1 == "west")
-        {
-            if(client->location_id() % world_state.width() == 0)
-            {
-                response = invalid_direction;
-            }
-            else if (world_state.location(client->location_id()-1).IsPassable(client) == false)
-            {
-                response = "That region is impassable.";
-            }
-            else
-            {
-                client->set_location(client->location_id()-1);
-                response = "You travel west.";
+                break;
             }
         }
         //todo: we may want to tell other players in the location that this player has left/joined
