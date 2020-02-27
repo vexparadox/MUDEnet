@@ -26,7 +26,7 @@
 
 //type def functions 
 using ActionFPtr =  void (*)(ENetEvent* event);
-using MUDActionFPtr = void (*)(ClientState&, ENetEvent* event, std::vector<std::string>); 
+using MUDActionFPtr = void (*)(ClientState&, std::vector<std::string>); 
 
 ENetAddress serverAddress;
 std::atomic<ENetHost*> host; // the Enet Host
@@ -69,14 +69,15 @@ struct MUDAction
 
 std::vector<MUDAction> mud_actions;
 
-void message_peer(ENetPeer* peer, const std::string& str);
+void message_peer(ENetPeer*, const std::string& str);
+void message_peer(const ClientState&, const std::string& str);
 void message_peer(ENetPeer* peer, Byte);
 
-void mud_look(ClientState&, ENetEvent*, std::vector<std::string>);
-void mud_say(ClientState&, ENetEvent*, std::vector<std::string>);
-void mud_go(ClientState&, ENetEvent* , std::vector<std::string>);
-void mud_help(ClientState&, ENetEvent*, std::vector<std::string>);
-void mud_inv(ClientState&, ENetEvent*, std::vector<std::string>);
-void mud_quests(ClientState&, ENetEvent*, std::vector<std::string>);
-void mud_pickup(ClientState&, ENetEvent*, std::vector<std::string>);
+void mud_look(ClientState&, std::vector<std::string>);
+void mud_say(ClientState&, std::vector<std::string>);
+void mud_go(ClientState&, std::vector<std::string>);
+void mud_help(ClientState&, std::vector<std::string>);
+void mud_inv(ClientState&, std::vector<std::string>);
+void mud_quests(ClientState&, std::vector<std::string>);
+void mud_pickup(ClientState&, std::vector<std::string>);
 

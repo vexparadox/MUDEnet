@@ -257,9 +257,7 @@ void new_user(ENetEvent* event)
     //send welcome string
     message_peer(client_ptr->enet_peer(), world_state.welcome_string());
     //send the user the information for where they currently are
-    mud_look(*client_ptr, event, std::vector<std::string>());
-
-    enet_packet_destroy (event->packet);
+    mud_look(*client_ptr, std::vector<std::string>());
 }
 
 //When a message is recieved from the player
@@ -297,20 +295,28 @@ void message_recieved(ENetEvent* event)
         if(tokens.size()-1 >= found_mud_action->m_min_num_args)
         {
             //call the matching mud action with the tokens we've seperated
-            found_mud_action->m_func(*client_state, event, tokens);
+            found_mud_action->m_func(*client_state, tokens);
             command_history.push_back(std::make_pair(client_state->username(), tokens.front()));
         }
         else
         {
-             message_peer(event->peer, "This action needs parameters, try using help!");
+             message_peer(*client_state, "This action needs parameters, try using help!");
         }
         
     }
     else
     {
-        message_peer(event->peer, "This is an unknown action, try using help!");
+        message_peer(*client_state, "This is an unknown action, try using help!");
     }
     enet_packet_destroy (event->packet);
+}
+
+void message_peer(const ClientState& client_state, const std::string& str)
+{
+    if(client_state.enet_peer())    
+    {
+        message_peer(client_state.enet_peer(), str);
+    }
 }
 
 void message_peer(ENetPeer* peer, const std::string& str)
@@ -338,7 +344,7 @@ void message_peer(ENetPeer* peer, Byte byte)
 
 //look around the players current position as stored in their client state
 //sends the player strings describing their current location and directions relative to it
-void mud_look(ClientState& client_state, ENetEvent* event, std::vector<std::string> tokens)
+void mud_look(ClientState& client_state, std::vector<std::string> tokens)
 {
     const Location& client_loc = world_state.location(client_state.location_id());
     std::stringstream ss;
@@ -362,11 +368,11 @@ void mud_look(ClientState& client_state, ENetEvent* event, std::vector<std::stri
         }
     }
     ss << "\n";
-    message_peer(event->peer, ss.str());
+    message_peer(client_state, ss.str());
 }
 
 //allows players to talk to people at the same location to them
-void mud_say(ClientState& client_state, ENetEvent* event, std::vector<std::string> tokens)
+void mud_say(ClientState& client_state, std::vector<std::string> tokens)
 {
     std::stringstream ss;
     ss << client_state.username() << ":";
@@ -380,14 +386,14 @@ void mud_say(ClientState& client_state, ENetEvent* event, std::vector<std::strin
     {
         if(state->enet_peer() && client_state.location_id() == state->location_id())
         {
-            message_peer(state->enet_peer(), ss.str());
+            message_peer(*state, ss.str());
         }
     }
 }
 
 //allows the players to move in n,e,s,w directions
 //checks if in the map, if passable, and then applies the move their client state
-void mud_go(ClientState& client_state, ENetEvent* event, std::vector<std::string> tokens)
+void mud_go(ClientState& client_state, std::vector<std::string> tokens)
 {
     const Location& client_loc = world_state.location(client_state.location_id());
     const std::string invalid_direction = "You can't go in that direction";
@@ -469,11 +475,11 @@ void mud_go(ClientState& client_state, ENetEvent* event, std::vector<std::string
         }
     }
     //todo: we may want to tell other players in the location that this player has left/joined
-    message_peer(event->peer, response);
-    }
+    message_peer(client_state, response);
+}
 
 //prints a bunch of commands, should probably just be in data somewhere but eh
-void mud_help(ClientState&, ENetEvent* event, std::vector<std::string>)
+void mud_help(ClientState& client_state, std::vector<std::string>)
 {
     std::stringstream ss;
     ss << "\n";
@@ -486,15 +492,15 @@ void mud_help(ClientState&, ENetEvent* event, std::vector<std::string>)
     ss << "pickup <id>                      -  Pickup an item" << "\n";
     ss << "exit                             -  Logout";
 
-    message_peer(event->peer, ss.str());
+    message_peer(client_state, ss.str());
 }
 
-void mud_inv(ClientState& client_state, ENetEvent* event, std::vector<std::string>)
+void mud_inv(ClientState& client_state, std::vector<std::string>)
 {
-    message_peer(event->peer, client_state.inventory().print_string(item_manager));
+    message_peer(client_state, client_state.inventory().print_string(item_manager));
 }
 
-void mud_quests(ClientState& client_state, ENetEvent* event, std::vector<std::string> tokens)
+void mud_quests(ClientState& client_state, std::vector<std::string> tokens)
 {
     //get the client's location
     const Location& client_loc = world_state.location(client_state.location_id());
@@ -530,7 +536,7 @@ void mud_quests(ClientState& client_state, ENetEvent* event, std::vector<std::st
         //we need 3 arguments for accept/abandon
         if(tokens.size() < 3)
         {
-            message_peer(event->peer, "This action needs parameters, try using help!");
+            message_peer(client_state, "This action needs parameters, try using help!");
             return;
         }
 
@@ -538,7 +544,7 @@ void mud_quests(ClientState& client_state, ENetEvent* event, std::vector<std::st
         std::istringstream int_ss(tokens.at(2));
         if(int_ss.fail())
         {
-            message_peer(event->peer, "That wasn't an ID! Try giving numbers");
+            message_peer(client_state, "That wasn't an ID! Try giving numbers");
             return;
         }
         int quest_id;
@@ -614,16 +620,16 @@ void mud_quests(ClientState& client_state, ENetEvent* event, std::vector<std::st
             }
         }
     }
-    message_peer(event->peer, ss.str());
+    message_peer(client_state, ss.str());
 }
 
-void mud_pickup(ClientState& client_state, ENetEvent* event, std::vector<std::string> tokens)
+void mud_pickup(ClientState& client_state, std::vector<std::string> tokens)
 {
     //get the 2nd argument as an int
     std::istringstream int_ss(tokens.at(1));
     if(int_ss.fail())
     {
-        message_peer(event->peer, "That wasn't an ID! Try giving numbers");
+        message_peer(client_state, "That wasn't an ID! Try giving numbers");
         return;
     }
     int item_id;
@@ -635,9 +641,8 @@ void mud_pickup(ClientState& client_state, ENetEvent* event, std::vector<std::st
         if(available_item_id == item_id)
         {
             client_state.inventory().gain_item(item_id);
-            message_peer(event->peer, "You picked up the item.\n");
+            message_peer(client_state, "You picked up the item.\n");
             return;
         }
     }
-    message_peer(event->peer, "That item isn't available here.\n");
 }

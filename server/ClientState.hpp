@@ -26,7 +26,7 @@ public:
 	: m_id(id), m_username(username), m_password(password) {};
 
 	void set_enet_peer(ENetPeer* peer) { m_enet_peer = peer; }
-	ENetPeer* enet_peer() { return m_enet_peer; }
+	ENetPeer* enet_peer() const { return m_enet_peer; }
 	void save(json&) const;
 
 	const Inventory& inventory() const { return m_inventory; }
