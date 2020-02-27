@@ -34,13 +34,13 @@ int main(int argc, char const *argv[])
     atexit (enet_deinitialize);
 
     //make the pairs of mud functions
-    mud_actions.push_back(std::make_pair("look", mud_look));
-    mud_actions.push_back(std::make_pair("say", mud_say));
-    mud_actions.push_back(std::make_pair("go", mud_go));
-    mud_actions.push_back(std::make_pair("help", mud_help));
-    mud_actions.push_back(std::make_pair("inv", mud_inv));
-    mud_actions.push_back(std::make_pair("pickup", mud_pickup));
-    mud_actions.push_back(std::make_pair("quest", mud_quests));
+    mud_actions.emplace_back(MUDAction{mud_look, "look", 0});
+    mud_actions.emplace_back(MUDAction{mud_say, "say", 1});
+    mud_actions.emplace_back(MUDAction{mud_go, "go", 1});
+    mud_actions.emplace_back(MUDAction{mud_help, "help", 0});
+    mud_actions.emplace_back(MUDAction{mud_inv, "inv", 0});
+    mud_actions.emplace_back(MUDAction{mud_pickup, "pickup", 1});
+    mud_actions.emplace_back(MUDAction{mud_quests, "quest", 1});
 
     std::cout << "Server was started on " << argv[1] << ":" << argv[2] << std::endl;
 
@@ -257,7 +257,7 @@ void new_user(ENetEvent* event)
     //send welcome string
     message_peer(client_ptr->enet_peer(), world_state.welcome_string());
     //send the user the information for where they currently are
-    mud_look(event, std::vector<std::string>());
+    mud_look(*client_ptr, event, std::vector<std::string>());
 
     enet_packet_destroy (event->packet);
 }
@@ -272,7 +272,7 @@ void message_recieved(ENetEvent* event)
     ClientState* client_state = client_manager.client_for_id(event->peer->data);
     char id;
     stream.read(id); // read the id out of the stream
-    if(client_state->ID() != id)
+    if(client_state == nullptr || client_state->ID() != id)
     {
         message_peer(event->peer, "Invalid Client ID, try logging out and in again!");
         return;
@@ -287,16 +287,24 @@ void message_recieved(ENetEvent* event)
         tokens.push_back(buffer);
     }
 
-    auto found_mud_action = std::find_if(mud_actions.begin(), mud_actions.end(), [tokens](const std::pair<const std::string&, MUDAction>& pair)
+    auto found_mud_action = std::find_if(mud_actions.begin(), mud_actions.end(), [tokens](const MUDAction& action)
     {
-        return tokens.front() == pair.first;
+        return tokens.front() == action.m_trigger;
     });
 
     if(found_mud_action != mud_actions.end())
     {
-        //call the matching mud action with the tokens we've seperated
-        found_mud_action->second(event, tokens);
-        command_history.push_back(std::make_pair(client_state->username(), tokens.front()));
+        if(tokens.size()-1 >= found_mud_action->m_min_num_args)
+        {
+            //call the matching mud action with the tokens we've seperated
+            found_mud_action->m_func(*client_state, event, tokens);
+            command_history.push_back(std::make_pair(client_state->username(), tokens.front()));
+        }
+        else
+        {
+             message_peer(event->peer, "This action needs parameters, try using help!");
+        }
+        
     }
     else
     {
@@ -330,10 +338,9 @@ void message_peer(ENetPeer* peer, Byte byte)
 
 //look around the players current position as stored in their client state
 //sends the player strings describing their current location and directions relative to it
-void mud_look(ENetEvent* event, std::vector<std::string> tokens)
+void mud_look(ClientState& client_state, ENetEvent* event, std::vector<std::string> tokens)
 {
-    ClientState* client = client_manager.client_for_id(event->peer->data);
-    const Location& client_loc = world_state.location(client->location_id());
+    const Location& client_loc = world_state.location(client_state.location_id());
     std::stringstream ss;
     ss << "\n ----" << client_loc.m_title << "----" << "\n";
     if(tokens.size() < 2)
@@ -359,130 +366,114 @@ void mud_look(ENetEvent* event, std::vector<std::string> tokens)
 }
 
 //allows players to talk to people at the same location to them
-void mud_say(ENetEvent* event, std::vector<std::string> tokens)
+void mud_say(ClientState& client_state, ENetEvent* event, std::vector<std::string> tokens)
 {
-    ClientState* client = client_manager.client_for_id(event->peer->data);
-    if(tokens.size() < 2)
+    std::stringstream ss;
+    ss << client_state.username() << ":";
+    //reconstruct from tokens, tbh this could be a lot better...
+    for(int i = 1; i < tokens.size(); ++i)
     {
-        message_peer(event->peer, "This action needs parameters, try using help!");
+        ss << " " << tokens.at(i);
     }
-    else
+    std::cout << ss.str() << std::endl;
+    for(ClientState* state : client_manager.online_users())
     {
-        std::stringstream ss;
-        ss << client->username() << ":";
-        //reconstruct from tokens, tbh this could be a lot better...
-        for(int i = 1; i < tokens.size(); ++i)
+        if(state->enet_peer() && client_state.location_id() == state->location_id())
         {
-            ss << " " << tokens.at(i);
-        }
-        std::cout << ss.str() << std::endl;
-        for(ClientState* state : client_manager.online_users())
-        {
-            if(state->enet_peer() && client->location_id() == state->location_id())
-            {
-                message_peer(state->enet_peer(), ss.str());
-            }
+            message_peer(state->enet_peer(), ss.str());
         }
     }
 }
 
 //allows the players to move in n,e,s,w directions
 //checks if in the map, if passable, and then applies the move their client state
-void mud_go(ENetEvent* event, std::vector<std::string> tokens)
+void mud_go(ClientState& client_state, ENetEvent* event, std::vector<std::string> tokens)
 {
-    ClientState* client = client_manager.client_for_id(event->peer->data);
-    const Location& client_loc = world_state.location(client->location_id());
-    if(tokens.size() < 2)
+    const Location& client_loc = world_state.location(client_state.location_id());
+    const std::string invalid_direction = "You can't go in that direction";
+    std::string response;
+    switch(direction_for_string(tokens.at(1)))
     {
-        message_peer(event->peer, "This action needs parameters, try using help!");
-    }
-    else
-    {
-        const std::string invalid_direction = "You can't go in that direction";
-        std::string response;
-        switch(direction_for_string(tokens.at(1)))
+        case DIRECTION::NORTH:
         {
-            case DIRECTION::NORTH:
-            {
-                if(client->location_id() < world_state.width())
-                {
-                    response = invalid_direction;
-                }
-                else if (world_state.location(client->location_id()-world_state.width()).IsPassable(client) == false)
-                {
-                    response = "That region is impassable.";
-                }
-                else
-                {
-                    client->set_location(client->location_id()-world_state.width());
-                    response = "You travel north.";
-                }
-                break;
-            }
-            case DIRECTION::EAST:
-            {
-                if((client->location_id()+1) % world_state.width() == 0)
-                {
-                    response = invalid_direction;
-                }
-                else if (world_state.location(client->location_id()+1).IsPassable(client) == false)
-                {
-                    response = "That region is impassable.";
-                }
-                else
-                {
-                    client->set_location(client->location_id()+1);
-                    response = "You travel east.";
-                }
-                break;
-            }
-            case DIRECTION::SOUTH:
-            {
-                if((client->location_id() / world_state.height()) >= world_state.height())
-                {
-                    response = invalid_direction;
-                }
-                else if (world_state.location(client->location_id()+world_state.width()).IsPassable(client) == false)
-                {
-                    response = "That region is impassable.";
-                }
-                else
-                {
-                    client->set_location(client->location_id()+world_state.width());
-                    response = "You travel south.";
-                }
-                break;
-            }
-            case DIRECTION::WEST:
-            {
-                if(client->location_id() % world_state.width() == 0)
-                {
-                    response = invalid_direction;
-                }
-                else if (world_state.location(client->location_id()-1).IsPassable(client) == false)
-                {
-                    response = "That region is impassable.";
-                }
-                else
-                {
-                    client->set_location(client->location_id()-1);
-                    response = "You travel west.";
-                }
-                break;
-            }
-            default:
+            if(client_state.location_id() < world_state.width())
             {
                 response = invalid_direction;
-                break;
             }
+            else if (world_state.location(client_state.location_id()-world_state.width()).IsPassable(client_state) == false)
+            {
+                response = "That region is impassable.";
+            }
+            else
+            {
+                client_state.set_location(client_state.location_id()-world_state.width());
+                response = "You travel north.";
+            }
+            break;
         }
-        //todo: we may want to tell other players in the location that this player has left/joined
-        message_peer(event->peer, response);
+        case DIRECTION::EAST:
+        {
+            if((client_state.location_id()+1) % world_state.width() == 0)
+            {
+                response = invalid_direction;
+            }
+            else if (world_state.location(client_state.location_id()+1).IsPassable(client_state) == false)
+            {
+                response = "That region is impassable.";
+            }
+            else
+            {
+                client_state.set_location(client_state.location_id()+1);
+                response = "You travel east.";
+            }
+            break;
+        }
+        case DIRECTION::SOUTH:
+        {
+            if((client_state.location_id() / world_state.height()) >= world_state.height())
+            {
+                response = invalid_direction;
+            }
+            else if (world_state.location(client_state.location_id()+world_state.width()).IsPassable(client_state) == false)
+            {
+                response = "That region is impassable.";
+            }
+            else
+            {
+                client_state.set_location(client_state.location_id()+world_state.width());
+                response = "You travel south.";
+            }
+            break;
+        }
+        case DIRECTION::WEST:
+        {
+            if(client_state.location_id() % world_state.width() == 0)
+            {
+                response = invalid_direction;
+            }
+            else if (world_state.location(client_state.location_id()-1).IsPassable(client_state) == false)
+            {
+                response = "That region is impassable.";
+            }
+            else
+            {
+                client_state.set_location(client_state.location_id()-1);
+                response = "You travel west.";
+            }
+            break;
+        }
+        default:
+        {
+            response = invalid_direction;
+            break;
+        }
     }
-}
+    //todo: we may want to tell other players in the location that this player has left/joined
+    message_peer(event->peer, response);
+    }
 
 //prints a bunch of commands, should probably just be in data somewhere but eh
-void mud_help(ENetEvent* event, std::vector<std::string>)
+void mud_help(ClientState&, ENetEvent* event, std::vector<std::string>)
 {
     std::stringstream ss;
     ss << "\n";
@@ -498,155 +489,136 @@ void mud_help(ENetEvent* event, std::vector<std::string>)
     message_peer(event->peer, ss.str());
 }
 
-void mud_inv(ENetEvent* event, std::vector<std::string>)
+void mud_inv(ClientState& client_state, ENetEvent* event, std::vector<std::string>)
 {
-    ClientState* client = client_manager.client_for_id(event->peer->data);
-    if(client)
-    {
-        message_peer(event->peer, client->inventory().print_string(item_manager));
-    }
+    message_peer(event->peer, client_state.inventory().print_string(item_manager));
 }
 
-void mud_quests(ENetEvent* event, std::vector<std::string> tokens)
+void mud_quests(ClientState& client_state, ENetEvent* event, std::vector<std::string> tokens)
 {
-    if(tokens.size() < 2)
-    {
-        message_peer(event->peer, "This action needs parameters, try using help!");
-        return;
-    }
-    ClientState* client = client_manager.client_for_id(event->peer->data);
-    if(client)
-    {
-        //get the client's location
-        const Location& client_loc = world_state.location(client->location_id());
-        std::stringstream ss;
+    //get the client's location
+    const Location& client_loc = world_state.location(client_state.location_id());
+    std::stringstream ss;
 
-        //if we're listing quests
-        if(tokens.at(1) == "list")
+    //if we're listing quests
+    if(tokens.at(1) == "list")
+    {
+        //get the client's active quests
+        ss << client_state.quest_status_string(quest_manager, false);
+        ss << "---- Available Quests ----\n";
+        //get the available quests at their location
+        auto available = client_loc.available_quests(client_state);
+        if(available.empty())
         {
-            //get the client's active quests
-            ss << client->quest_status_string(quest_manager, false);
-            ss << "---- Available Quests ----\n";
-            //get the available quests at their location
-            auto available = client_loc.available_quests(client);
-            if(available.empty())
+            ss << "There are no quests at this location.\n";
+        }
+        else
+        {
+            //create the strings for each available quest
+            for(int quest_id : available)
             {
-                ss << "There are no quests at this location.\n";
+                Quest* quest = quest_manager.quest_for_id(quest_id);
+                if(quest)
+                {
+                    ss << quest->quest_string(true);
+                }
+            }
+        }
+    }
+    else
+    {   
+        //we need 3 arguments for accept/abandon
+        if(tokens.size() < 3)
+        {
+            message_peer(event->peer, "This action needs parameters, try using help!");
+            return;
+        }
+
+        //get the 3rd argument as an int
+        std::istringstream int_ss(tokens.at(2));
+        if(int_ss.fail())
+        {
+            message_peer(event->peer, "That wasn't an ID! Try giving numbers");
+            return;
+        }
+        int quest_id;
+        int_ss >> quest_id;
+
+        //accept a quest at this location
+        if(tokens.at(1) == "accept")
+        {
+            //check if it's available
+            if(client_loc.is_quest_available(client_state, quest_id))
+            {
+                //accept if it is
+                client_state.accept_quest(quest_id);
+                //construct strings for acceptance
+                ss << "Quest accepted!\n";
+                Quest* quest = quest_manager.quest_for_id(quest_id);
+                if(quest)
+                {
+                    ss << quest->accept_string() << "\n";
+                }
             }
             else
             {
-                //create the strings for each available quest
-                for(int quest_id : available)
-                {
-                    Quest* quest = quest_manager.quest_for_id(quest_id);
-                    if(quest)
-                    {
-                        ss << quest->quest_string(true);
-                    }
-                }
+                //otherwise say it's not available
+                ss << "That quest isn't available here!\n";
             }
         }
-        else
-        {   
-            //we need 3 arguments for accept/abandon
-            if(tokens.size() < 3)
+        else if(tokens.at(1) == "abandon")
+        {
+            if(client_state.has_active_quest(quest_id))
             {
-                message_peer(event->peer, "This action needs parameters, try using help!");
-                return;
+                client_state.abandon_quest(quest_id);
+                ss << "Quest abandoned.\n";
             }
-
-            //get the 3rd argument as an int
-            std::istringstream int_ss(tokens.at(2));
-            if(int_ss.fail())
+            else
             {
-                message_peer(event->peer, "That wasn't an ID! Try giving numbers");
-                return;
-            }
-            int quest_id;
-            int_ss >> quest_id;
-
-            //accept a quest at this location
-            if(tokens.at(1) == "accept")
-            {
-                //check if it's available
-                if(client_loc.is_quest_available(client, quest_id))
-                {
-                    //accept if it is
-                    client->accept_quest(quest_id);
-                    //construct strings for acceptance
-                    ss << "Quest accepted!\n";
-                    Quest* quest = quest_manager.quest_for_id(quest_id);
-                    if(quest)
-                    {
-                        ss << quest->accept_string() << "\n";
-                    }
-                }
-                else
-                {
-                    //otherwise say it's not available
-                    ss << "That quest isn't available here!\n";
-                }
-            }
-            else if(tokens.at(1) == "abandon")
-            {
-                if(client->has_active_quest(quest_id))
-                {
-                    client->abandon_quest(quest_id);
-                    ss << "Quest abandoned.\n";
-                }
-                else
-                {
-                    ss << "You're not currently on that quest.\n";
-                }
-            }
-            else if(tokens.at(1) == "complete")
-            {
-                Quest* quest = quest_manager.quest_for_id(quest_id);
-                if(quest && client->has_active_quest(*quest))
-                {
-                    switch(quest_manager.completion_status(*quest, client, world_state.location(client->location_id())))
-                    {
-                        case QUEST_COMPLETION_STATUS::COMPLETE:
-                        {
-                            client->complete_quest(*quest);
-                            ss << quest->complete_string() << "\n";
-                            break;
-                        }
-                        case QUEST_COMPLETION_STATUS::MISSING_ITEMS:
-                        {
-                            ss << "You're missing a required item to complete that quest.\n";
-                            break;
-                        }
-                        case QUEST_COMPLETION_STATUS::BAD_LOCATION:
-                        {
-                            ss << "You're not in the right place to complete that quest.\n";
-                            break;
-                        }
-                        default:
-                        {
-                            ss << "Unknown issue, see admin.\n";
-                            break;
-                        }
-                    }
-                }
-                else
-                {
-                    ss << "You're not currently on that quest.\n";
-                }
+                ss << "You're not currently on that quest.\n";
             }
         }
-        message_peer(event->peer, ss.str());
+        else if(tokens.at(1) == "complete")
+        {
+            Quest* quest = quest_manager.quest_for_id(quest_id);
+            if(quest && client_state.has_active_quest(*quest))
+            {
+                switch(quest_manager.completion_status(*quest, client_state, world_state.location(client_state.location_id())))
+                {
+                    case QUEST_COMPLETION_STATUS::COMPLETE:
+                    {
+                        client_state.complete_quest(*quest);
+                        ss << quest->complete_string() << "\n";
+                        break;
+                    }
+                    case QUEST_COMPLETION_STATUS::MISSING_ITEMS:
+                    {
+                        ss << "You're missing a required item to complete that quest.\n";
+                        break;
+                    }
+                    case QUEST_COMPLETION_STATUS::BAD_LOCATION:
+                    {
+                        ss << "You're not in the right place to complete that quest.\n";
+                        break;
+                    }
+                    default:
+                    {
+                        ss << "Unknown issue, see admin.\n";
+                        break;
+                    }
+                }
+            }
+            else
+            {
+                ss << "You're not currently on that quest.\n";
+            }
+        }
     }
+    message_peer(event->peer, ss.str());
 }
 
-void mud_pickup(ENetEvent* event, std::vector<std::string> tokens)
+void mud_pickup(ClientState& client_state, ENetEvent* event, std::vector<std::string> tokens)
 {
-    if(tokens.size() < 2)
-    {
-        message_peer(event->peer, "This action needs parameters, try using help!");
-        return;
-    }
-    
     //get the 2nd argument as an int
     std::istringstream int_ss(tokens.at(1));
     if(int_ss.fail())
@@ -658,18 +630,14 @@ void mud_pickup(ENetEvent* event, std::vector<std::string> tokens)
     int_ss >> item_id;
     std::stringstream ss;
 
-    ClientState* client = client_manager.client_for_id(event->peer->data);
-    if(client)
+    for(int available_item_id : world_state.location(client_state.location_id()).m_available_items)
     {
-        for(int available_item_id : world_state.location(client->location_id()).m_available_items)
+        if(available_item_id == item_id)
         {
-            if(available_item_id == item_id)
-            {
-                client->inventory().gain_item(item_id);
-                message_peer(event->peer, "You picked up the item.\n");
-                return;
-            }
+            client_state.inventory().gain_item(item_id);
+            message_peer(event->peer, "You picked up the item.\n");
+            return;
         }
-        message_peer(event->peer, "That item isn't available here.\n");
     }
+    message_peer(event->peer, "That item isn't available here.\n");
 }

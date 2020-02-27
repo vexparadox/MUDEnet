@@ -47,24 +47,24 @@ Location::Location(json& location_obj)
 	}
 }
 
-bool Location::IsPassable(ClientState* client_state) const
+bool Location::IsPassable(const ClientState&) const
 {
-	//check client has required items etcetc
-	return client_state && m_passable;
+	//todo: check client has required items etcetc
+	return m_passable;
 }
 
-std::vector<int> Location::available_quests(ClientState* client_state) const
+std::vector<int> Location::available_quests(const ClientState& client_state) const
 {
 	std::vector<int> quests;
 	quests.reserve(m_available_quests.size());
 	std::copy_if(m_available_quests.begin(), m_available_quests.end(), std::back_inserter(quests), [client_state](int quest_id)
 	{
-		return client_state->has_completed_quest(quest_id) == false && client_state->has_active_quest(quest_id) == false;
+		return client_state.has_completed_quest(quest_id) == false && client_state.has_active_quest(quest_id) == false;
 	});
 	return quests;
 }
 
-bool Location::is_quest_available(ClientState* client_state, int quest_id) const
+bool Location::is_quest_available(const ClientState& client_state, int quest_id) const
 {
 	auto available = available_quests(client_state);
 	return std::find(available.begin(), available.end(), quest_id) != available.end();

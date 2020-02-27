@@ -31,10 +31,10 @@ struct Location
 	std::array<std::string, DIRECTION::NUM> m_direction_descriptions;
 	bool m_passable;
 	Location(json&);
-	std::vector<int> available_quests(ClientState*) const;
-	bool is_quest_available(ClientState*, int quest_id) const;
+	std::vector<int> available_quests(const ClientState&) const;
+	bool is_quest_available(const ClientState&, int quest_id) const;
 	const std::string& direction_string(DIRECTION direction) const;
-	bool IsPassable(ClientState*) const;
+	bool IsPassable(const ClientState&) const;
 };
 
 class WorldState

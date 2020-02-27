@@ -36,21 +36,16 @@ Quest* QuestManager::quest_for_id(int id) const
 	return nullptr;
 }
 
-QUEST_COMPLETION_STATUS QuestManager::completion_status(const Quest& quest, const ClientState* client, const Location& location) const
+QUEST_COMPLETION_STATUS QuestManager::completion_status(const Quest& quest, const ClientState& client_state, const Location& location) const
 {
-	if(client == nullptr)
-	{
-		return QUEST_COMPLETION_STATUS::UNKNOWN;
-	}
-
 	if(location.m_id != quest.required_location())
 	{
 		return QUEST_COMPLETION_STATUS::BAD_LOCATION;
 	}
 
-	const bool has_items = std::all_of(quest.required_items().begin(), quest.required_items().end(), [client](int item_id)
+	const bool has_items = std::all_of(quest.required_items().begin(), quest.required_items().end(), [client_state](int item_id)
 	{
-		return client->inventory().has_item(item_id);
+		return client_state.inventory().has_item(item_id);
 	});
 
 	if(has_items == false)

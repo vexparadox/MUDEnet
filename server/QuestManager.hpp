@@ -21,7 +21,7 @@ class QuestManager
 public:
 	bool load(const std::string&);
 
-	QUEST_COMPLETION_STATUS completion_status(const Quest& quest, const ClientState* client, const Location& loc) const;
+	QUEST_COMPLETION_STATUS completion_status(const Quest& quest, const ClientState& client, const Location& loc) const;
 
 	Quest* quest_for_id(int) const;
 };
