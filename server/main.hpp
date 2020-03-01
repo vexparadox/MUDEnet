@@ -1,11 +1,7 @@
 #pragma once
 #include "../shared/Config.hpp"
-#include "ClientState.hpp"
-#include "WorldState.hpp"
-#include "ClientManager.hpp"
-#include "ItemManager.hpp"
-#include "QuestManager.hpp"
 #include "../shared/DataStream.hpp"
+#include "Model.hpp"
 #include <vector>
 #include <ctime>
 #include <stdio.h>
@@ -26,7 +22,6 @@
 
 //type def functions 
 using ActionFPtr =  void (*)(ENetEvent* event);
-using MUDActionFPtr = void (*)(ClientState&, std::vector<std::string>); 
 
 ENetAddress serverAddress;
 std::atomic<ENetHost*> host; // the Enet Host
@@ -52,32 +47,9 @@ ActionFPtr actions[] = {
 	new_user
 };
 
-//managers
-WorldState world_state;
-ClientManager client_manager;
-ItemManager item_manager;
-QuestManager quest_manager;
-
-
-struct MUDAction
-{
-	MUDActionFPtr m_func = nullptr;
-	std::string m_trigger;
-	int m_min_num_args = 0;
-};
-
-
-std::vector<MUDAction> mud_actions;
+//manager
+Model model;
 
 void message_peer(ENetPeer*, const std::string& str);
 void message_peer(const ClientState&, const std::string& str);
 void message_peer(ENetPeer* peer, Byte);
-
-void mud_look(ClientState&, std::vector<std::string>);
-void mud_say(ClientState&, std::vector<std::string>);
-void mud_go(ClientState&, std::vector<std::string>);
-void mud_help(ClientState&, std::vector<std::string>);
-void mud_inv(ClientState&, std::vector<std::string>);
-void mud_quests(ClientState&, std::vector<std::string>);
-void mud_pickup(ClientState&, std::vector<std::string>);
-
