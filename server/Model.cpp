@@ -28,7 +28,7 @@ void Model::Save()
 
 std::string Model::ProcessAction(ClientState& client, const std::vector<std::string>& tokens)
 {
-    auto found_action = std::find_if(m_actions.begin(), m_actions.end(), [tokens](const Action& action)
+    auto found_action = std::find_if(m_actions.begin(), m_actions.end(), [&tokens](const Action& action)
     {
         return tokens.front() == action.m_trigger;
     });
@@ -37,7 +37,7 @@ std::string Model::ProcessAction(ClientState& client, const std::vector<std::str
     {
         if(tokens.size()-1 >= found_action->m_min_num_args)
         {
-            //call the matching mud action with the tokens we've seperated
+            //call the matchings action with the tokens we've seperated
             ActionFPtr func = found_action->m_func;
             return (this->*func)(client, tokens);
         }
@@ -52,7 +52,7 @@ std::string Model::ProcessAction(ClientState& client, const std::vector<std::str
 
 //look around the players current position as stored in their client state
 //sends the player strings describing their current location and directions relative to it
-std::string Model::look(ClientState& client_state, std::vector<std::string> tokens)
+std::string Model::look(ClientState& client_state, const std::vector<std::string>& tokens)
 {
     const Location& client_loc = m_world_state.location(client_state.location_id());
     std::stringstream ss;
@@ -80,7 +80,7 @@ std::string Model::look(ClientState& client_state, std::vector<std::string> toke
 }
 
 //allows players to talk to people at the same location to them
-std::string Model::say(ClientState& client_state, std::vector<std::string> tokens)
+std::string Model::say(ClientState& client_state, const std::vector<std::string>& tokens)
 {
     std::stringstream ss;
     ss << client_state.username() << ":";
@@ -102,7 +102,7 @@ std::string Model::say(ClientState& client_state, std::vector<std::string> token
 
 //allows the players to move in n,e,s,w directions
 //checks if in the map, if passable, and then applies the move their client state
-std::string Model::go(ClientState& client_state, std::vector<std::string> tokens)
+std::string Model::go(ClientState& client_state, const std::vector<std::string>& tokens)
 {
     const Location& client_loc = m_world_state.location(client_state.location_id());
     const std::string invalid_direction = "You can't go in that direction";
@@ -188,7 +188,7 @@ std::string Model::go(ClientState& client_state, std::vector<std::string> tokens
 }
 
 //prints a bunch of commands, should probably just be in data somewhere but eh
-std::string Model::help(ClientState& client_state, std::vector<std::string>)
+std::string Model::help(ClientState& client_state, const std::vector<std::string>&)
 {
     std::stringstream ss;
     ss << "\n";
@@ -204,12 +204,12 @@ std::string Model::help(ClientState& client_state, std::vector<std::string>)
     return ss.str();
 }
 
-std::string Model::inv(ClientState& client_state, std::vector<std::string>)
+std::string Model::inv(ClientState& client_state, const std::vector<std::string>&)
 {
     return client_state.inventory().print_string(m_item_manager);
 }
 
-std::string Model::quests(ClientState& client_state, std::vector<std::string> tokens)
+std::string Model::quests(ClientState& client_state, const std::vector<std::string>& tokens)
 {
     //get the client's location
     const Location& client_loc = m_world_state.location(client_state.location_id());
@@ -330,7 +330,7 @@ std::string Model::quests(ClientState& client_state, std::vector<std::string> to
     return ss.str();
 }
 
-std::string Model::pickup(ClientState& client_state, std::vector<std::string> tokens)
+std::string Model::pickup(ClientState& client_state, const std::vector<std::string>& tokens)
 {
     //get the 2nd argument as an int
     std::istringstream int_ss(tokens.at(1));

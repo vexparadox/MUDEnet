@@ -9,7 +9,7 @@
 class Model
 {
 public:
-    using ActionFPtr = std::string(Model::*)(ClientState&, std::vector<std::string>); 
+    using ActionFPtr = std::string(Model::*)(ClientState&, const std::vector<std::string>&); 
 
     std::string ProcessAction(ClientState&, const std::vector<std::string>&);
 
@@ -22,13 +22,13 @@ public:
     QuestManager& GetQuestManager() {return m_quest_manager; }
 
 private:
-    std::string look(ClientState&, std::vector<std::string>);
-    std::string say(ClientState&, std::vector<std::string>);
-    std::string go(ClientState&, std::vector<std::string>);
-    std::string help(ClientState&, std::vector<std::string>);
-    std::string inv(ClientState&, std::vector<std::string>);
-    std::string quests(ClientState&, std::vector<std::string>);
-    std::string pickup(ClientState&, std::vector<std::string>);
+    std::string look(ClientState&, const std::vector<std::string>&);
+    std::string say(ClientState&, const std::vector<std::string>&);
+    std::string go(ClientState&, const std::vector<std::string>&);
+    std::string help(ClientState&, const std::vector<std::string>&);
+    std::string inv(ClientState&, const std::vector<std::string>&);
+    std::string quests(ClientState&, const std::vector<std::string>&);
+    std::string pickup(ClientState&, const std::vector<std::string>&);
 
     struct Action
     {

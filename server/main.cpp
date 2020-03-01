@@ -107,15 +107,6 @@ void take_input()
             {
                 model.Save();
             }
-            else if(strcmp(buffer, "history") == 0)
-            {
-                std::cout << "======= Command History =======" << std::endl;
-                for(std::pair<std::string, std::string>& pair : command_history)
-                {
-                    std::cout << pair.first << " - " << pair.second << std::endl;
-                }
-                std::cout << std::endl;
-            }
             else
             {
                 stream.write_buffer(buffer, std::strlen(buffer));
