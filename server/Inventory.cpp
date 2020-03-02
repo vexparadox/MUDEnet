@@ -35,7 +35,11 @@ std::string Inventory::print_string(const ItemManager& item_manager) const
 		Item* item = item_manager.item_for_id(item_id);
 		if(item)
 		{
-			ss << "[" << num_items(*item) << "] " <<  item->name() << " - " << item->description() << "\n";
+			if(item->Maximum() != 0)
+			{
+				ss << "[" << num_items(*item) << "/" << item->Maximum() << "] ";
+			}
+			ss << item->name() << " - " << item->description() << "\n";
 		}
 		else
 		{
@@ -52,7 +56,11 @@ void Inventory::gain_item(const Item& item)
 
 void Inventory::lose_item(int item_id)
 {
-	m_item_ids.erase(std::remove(m_item_ids.begin(), m_item_ids.end(), item_id), m_item_ids.end());
+	auto iter = std::find(m_item_ids.begin(), m_item_ids.end(), item_id);
+	if(iter != m_item_ids.end())
+	{
+		m_item_ids.erase(iter);
+	}
 }
 
 void Inventory::lose_item(const Item& item)
