@@ -14,6 +14,7 @@ Item::Item(json& item_obj)
 	m_id = item_obj["id"]; 
 	m_name = item_obj["name"];
 	m_description = item_obj["description"];
+	m_maximum_num = item_obj["max"];
 }
 
 //returns an item attribute enum from a string

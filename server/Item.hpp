@@ -17,12 +17,14 @@ class Item
 	std::vector<ITEM_ATTRIBUTE> m_attributes;
 	std::string m_name;
 	std::string m_description;
+	int m_maximum_num;
 public:
 	Item(json&); // load from file
 
 	int ID() const { return m_id; }
 	const std::string& name() const { return m_name; }
 	const std::string& description() const { return m_description; }
+	int Maximum() const { return m_maximum_num; }
 };
 
 ITEM_ATTRIBUTE item_attribute_from_string(const std::string&);

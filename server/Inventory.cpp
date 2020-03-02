@@ -24,12 +24,18 @@ std::string Inventory::print_string(const ItemManager& item_manager) const
 	ss << "---- Inventory ----" << "\n";
 	ss << "Cash: " << cash() << "\n";
 	ss << "--- Items ---" << "\n";
-	for(int item_id : m_item_ids)
+
+	//sort and get uniques
+	std::vector<int> items = m_item_ids;
+	std::sort(items.begin(), items.end());
+	items.erase(std::unique(items.begin(), items.end()), items.end());
+
+	for(int item_id : items)
 	{
 		Item* item = item_manager.item_for_id(item_id);
 		if(item)
 		{
-			ss << item->name() << " - " << item->description() << "\n";
+			ss << "[" << num_items(*item) << "] " <<  item->name() << " - " << item->description() << "\n";
 		}
 		else
 		{
@@ -62,4 +68,14 @@ bool Inventory::has_item(int item_id) const
 bool Inventory::has_item(const Item& item) const
 {
 	return has_item(item.ID());
+}
+
+int Inventory::num_items(int item_id) const
+{
+	return std::count(m_item_ids.begin(), m_item_ids.end(), item_id);
+}
+
+int Inventory::num_items(const Item& item) const
+{
+	return num_items(item.ID());
 }

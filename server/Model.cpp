@@ -342,6 +342,29 @@ std::string Model::pickup(ClientState& client_state, const std::vector<std::stri
     int_ss >> item_id;
     std::stringstream ss;
 
+    const Item* item = GetItemManager().item_for_id(item_id);
+    const std::vector<int>& available = m_world_state.location(client_state.location_id()).m_available_items;
+    const bool exists_at_location = item && std::find(available.begin(), available.end(), item_id) != available.end();
+
+    if(exists_at_location)
+    {
+        if(item->Maximum() == 0 || client_state.inventory().num_items(*item) < item->Maximum())
+        {
+            client_state.inventory().gain_item(item_id);
+            return "You picked up the " + item->name() + ".\n";
+        }
+        else
+        {
+            return "You can't carry anymore " + item->name() + ".\n";
+        }
+        
+    }
+    else if(item)
+    {
+        return "You can't see that item here.\n";
+    }
+    
+
     for(int available_item_id : m_world_state.location(client_state.location_id()).m_available_items)
     {
         if(available_item_id == item_id)

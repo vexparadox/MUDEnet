@@ -55,7 +55,7 @@
 			"s": "The south is impassable, once again the black has caught up to you.",
 			"w": "Turning to the west you see the face of the void, it stares back.",
 			"requireditems": ["cut"],
-			"passable": false,
+			"passable": true,
 			"quests" : [],
 			"items" : []
 		},
@@ -69,7 +69,7 @@
 			"s": "The south sees the world fall away into black, you turn away.",
 			"w": "Turning to the west you see the forest continue.",
 			"requireditems": ["cut"],
-			"passable": false,
+			"passable": true,
 			"quests" : [],
 			"items" : []
 		},

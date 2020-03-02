@@ -25,6 +25,8 @@ public:
 	void lose_item(const Item&);
 	bool has_item(int item_id) const;
 	bool has_item(const Item&) const;
+	int num_items(int item_id) const;
+	int num_items(const Item&) const;
 
 	void save(json&) const;
 };

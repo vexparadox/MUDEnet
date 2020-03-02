@@ -5,7 +5,8 @@
 			"id" : 0,
 			"name" : "Wooden Stick",
 			"description" : "A wooden stick, no more interesting than dirt.",
-			"attributes" : ["weapon"]
+			"attributes" : ["weapon"],
+			"max" : 2
 		}
 	]
 }
